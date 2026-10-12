@@ -1,6 +1,6 @@
 # Smart Hostel Management System
 
-A modern, scalable Hostel Management System backend built with **Node.js**, **Express**, and **MongoDB (Mongoose)** featuring robust authentication, role-based access control (RBAC), Zod request schema validation, dedicated brute-force rate limiters, and structured database schemas for student accommodation workflows.
+A modern, scalable Hostel Management System backend built with **Node.js**, **Express**, and **MongoDB (Mongoose)** featuring robust authentication, role-based access control (RBAC), token revocation & session management, CSRF protection, Zod request schema validation, dedicated brute-force rate limiters, admin bootstrap tooling, and an automated integration test suite.
 
 ---
 
@@ -14,15 +14,28 @@ A modern, scalable Hostel Management System backend built with **Node.js**, **Ex
   - [Prerequisites](#prerequisites)
   - [Installation](#installation)
   - [Running the Server](#running-the-server)
-- [API Documentation & Sample Data](#api-documentation--sample-data)
-  - [1. Health Check](#1-health-check)
-  - [2. User Registration](#2-user-registration)
-  - [3. User Login](#3-user-login)
-  - [4. Profile Verification (Protected)](#4-profile-verification-protected)
-  - [5. Role-Based Access Check (Warden / Admin)](#5-role-based-access-check-warden--admin)
-- [Validation & Security Architecture](#validation--security-architecture)
+  - [Running Automated Tests](#running-automated-tests)
+  - [Bootstrapping an Admin Account](#bootstrapping-an-admin-account)
+- [API Documentation](#api-documentation)
+  - [Authentication Endpoints](#authentication-endpoints)
+    - [1. Health Check](#1-health-check)
+    - [2. User Registration](#2-user-registration)
+    - [3. User Login](#3-user-login)
+    - [4. User Logout (Session Revocation)](#4-user-logout-session-revocation)
+    - [5. Current User Profile (`/me`)](#5-current-user-profile-me)
+    - [6. Development Verification Routes](#6-development-verification-routes)
+  - [Admin User Management Endpoints](#admin-user-management-endpoints)
+    - [7. List All Users (Paginated & Filterable)](#7-list-all-users-paginated--filterable)
+    - [8. Get User by ID](#8-get-user-by-id)
+    - [9. Update Basic User Details](#9-update-basic-user-details)
+    - [10. Activate / Deactivate User Status](#10-activate--deactivate-user-status)
+    - [11. Update User Role](#11-update-user-role)
+- [Security & Validation Architecture](#security--validation-architecture)
+  - [CSRF Protection & Custom Header Requirement](#csrf-protection--custom-header-requirement)
+  - [Token Revocation & Session Management](#token-revocation--session-management)
   - [Request Validation with Zod](#request-validation-with-zod)
   - [Dedicated Authentication Rate Limiters](#dedicated-authentication-rate-limiters)
+  - [Centralized Error Handling](#centralized-error-handling)
 - [Authentication & Security Flow](#authentication--security-flow)
 - [Git Branching Strategy](#git-branching-strategy)
 
@@ -31,26 +44,32 @@ A modern, scalable Hostel Management System backend built with **Node.js**, **Ex
 ## Overview
 
 The Smart Hostel system automates and streamlines hostel administration tasks including:
-- Student registration and secure authentication with schema validation.
-- Role-based authorization (`student`, `warden`, `staff`, `admin`).
-- Token handling using JSON Web Tokens (JWT) stored in HTTP-Only cookies.
-- Comprehensive hostel modules: room allocation, complaints, fee payments, visitor logs, and official notice boards.
+- **Secure Authentication & Session Lifecycle**: Student registration, password hashing with bcrypt, JWT issued with unique `jti`, HTTP-only cookies, token blacklisting/revocation upon logout, and CSRF protection.
+- **Role-Based Access Control (RBAC)**: Strict permission tiers for `student`, `warden`, `staff`, and `admin`.
+- **User Management**: Administrative APIs to list, filter, search, inspect, update, activate/deactivate, and reassign roles to users with built-in guardrails against self-demotion or self-lockout.
+- **Hostel Domain Schemas**: Modular Mongoose schemas for hostels, rooms, beds, allocations, complaints, fee structures, payment records, notices, and visitor logs.
+- **Enterprise Security**: Strict input validation with Zod, rate limiting, security HTTP headers with Helmet, and CORS origin whitelisting.
 
 ---
 
 ## Tech Stack
 
-- **Runtime**: Node.js (ES Modules)
+- **Runtime**: Node.js (v18+, ES Modules)
 - **Framework**: Express.js
 - **Database**: MongoDB with Mongoose ODM
 - **Schema Validation**: Zod (`zod`)
-- **Authentication**: JWT (`jsonwebtoken`) & password encryption with `bcryptjs` (12 salt rounds)
-- **Security & Utilities**:
-  - `helmet`: Security HTTP headers
-  - `cors`: Cross-Origin Resource Sharing
-  - `express-rate-limit`: Dedicated rate limiting against brute force & DoS
-  - `cookie-parser`: Secure HTTP-only cookie parsing
-  - `morgan`: HTTP request logging
+- **Authentication & Security**:
+  - `jsonwebtoken`: Access tokens with unique identifier (`jti`), issuer, and audience claims
+  - `bcryptjs`: Password hashing with 12 salt rounds
+  - `helmet`: Security HTTP response headers
+  - `cors`: Whitelisted cross-origin resource sharing
+  - `express-rate-limit`: Brute-force protection & API request throttling
+  - `cookie-parser`: Secure HTTP-only cookie management
+- **Logging**: Morgan HTTP logger (development mode)
+- **Testing & Quality Assurance**:
+  - Node.js native test runner (`node --test`)
+  - `supertest`: HTTP endpoint integration testing
+  - `mongodb-memory-server`: Isolated in-memory MongoDB test database
 
 ---
 
@@ -58,7 +77,7 @@ The Smart Hostel system automates and streamlines hostel administration tasks in
 
 ```text
 smart-hostel/
-├── client/                     # Frontend application directory (React / Vite)
+├── client/                               # Frontend application (React / Vite)
 │   ├── src/
 │   │   ├── components/
 │   │   ├── hooks/
@@ -67,45 +86,55 @@ smart-hostel/
 │   │   └── services/
 │   └── package.json
 │
-├── server/                     # Backend API service
+├── server/                               # Backend API service
+│   ├── scripts/
+│   │   └── bootstrap-admin.js            # Initial admin elevation tool
 │   ├── src/
 │   │   ├── config/
-│   │   │   ├── db.js           # MongoDB connection handler
-│   │   │   └── env.js          # Environment variable parser & validator
+│   │   │   ├── db.js                     # MongoDB connection handler
+│   │   │   └── env.js                    # Validated environment configurations
 │   │   ├── controllers/
-│   │   │   └── auth.controller.js
+│   │   │   ├── auth.controller.js        # Register, login, logout, me handlers
+│   │   │   └── user.controller.js        # Admin user management handlers
 │   │   ├── middlewares/
-│   │   │   ├── auth.middleware.js          # JWT verification & req.user attachment
-│   │   │   ├── authRateLimit.middleware.js # Dedicated registration & login rate limiters
-│   │   │   ├── role.middleware.js          # Role-based authorization (RBAC)
-│   │   │   ├── error.middleware.js         # Global error handling
-│   │   │   ├── notFound.middleware.js      # 404 handler
-│   │   │   └── validate.middleware.js      # Zod request validation middleware
+│   │   │   ├── auth.middleware.js        # JWT verification, revocation check & req.user
+│   │   │   ├── authRateLimit.middleware.js # Registration & login brute-force limiters
+│   │   │   ├── csrf.middleware.js        # CSRF check (X-Requested-With & origin verification)
+│   │   │   ├── error.middleware.js       # Centralized error handler
+│   │   │   ├── notFound.middleware.js    # 404 route handler
+│   │   │   ├── role.middleware.js        # Role-based authorization guard (RBAC)
+│   │   │   └── validate.middleware.js    # Zod schema validation middleware
 │   │   ├── models/
-│   │   │   ├── user.model.js
-│   │   │   ├── hostel.model.js
-│   │   │   ├── room.model.js
-│   │   │   ├── bed.model.js
-│   │   │   ├── allocation.model.js
-│   │   │   ├── complaint.model.js
-│   │   │   ├── fee.model.js
-│   │   │   ├── payment.model.js
-│   │   │   ├── notice.model.js
-│   │   │   └── visitor.model.js
+│   │   │   ├── allocation.model.js       # Room/bed student allocations
+│   │   │   ├── bed.model.js              # Bed slots within rooms
+│   │   │   ├── complaint.model.js        # Maintenance & grievance tickets
+│   │   │   ├── fee.model.js              # Fee structures & dues
+│   │   │   ├── hostel.model.js           # Hostel blocks & properties
+│   │   │   ├── notice.model.js           # Announcements & official notices
+│   │   │   ├── payment.model.js          # Payment transaction records
+│   │   │   ├── revokedToken.model.js     # Token revocation blacklist with TTL expiry
+│   │   │   ├── room.model.js             # Room configurations & capacities
+│   │   │   ├── user.model.js             # User accounts & role definitions
+│   │   │   └── visitor.model.js          # Visitor log entries
 │   │   ├── routes/
-│   │   │   └── auth.routes.js
+│   │   │   ├── auth.routes.js            # /api/v1/auth routing
+│   │   │   └── user.routes.js            # /api/v1/users admin routing
 │   │   ├── services/
-│   │   │   ├── auth.service.js
-│   │   │   └── user.service.js
+│   │   │   ├── auth.service.js           # Registration & authentication business logic
+│   │   │   ├── session.service.js        # Token blacklisting & session revocation logic
+│   │   │   └── user.service.js           # User querying, filtering & updating logic
 │   │   ├── utils/
-│   │   │   ├── ApiError.js
-│   │   │   ├── asyncHandler.js
-│   │   │   ├── response.js
-│   │   │   └── tokens.js
+│   │   │   ├── ApiError.js               # Standardized application error class
+│   │   │   ├── asyncHandler.js           # Async route wrapper for exception handling
+│   │   │   ├── response.js               # Standardized JSON response envelope
+│   │   │   └── token.js                  # JWT issuance, verification & SHA-256 hashing
 │   │   ├── validators/
-│   │   │   └── auth.validator.js           # Zod schemas for register & login
-│   │   ├── app.js             # Express app setup and middleware configuration
-│   │   └── server.js          # Application entrypoint & HTTP server listener
+│   │   │   ├── auth.validator.js         # Register & login Zod schemas
+│   │   │   └── user.validator.js         # User list queries & update schemas
+│   │   ├── app.js                       # Express app setup & middleware pipeline
+│   │   └── server.js                    # HTTP listener bootstrap
+│   ├── tests/
+│   │   └── auth.integration.test.js     # End-to-end integration tests
 │   ├── .env.example
 │   └── package.json
 └── README.md
@@ -115,7 +144,7 @@ smart-hostel/
 
 ## Environment Variables
 
-Configure the `.env` file in the `server/` directory:
+Create and configure a `.env` file in the `server/` directory:
 
 ```env
 PORT=5001
@@ -126,19 +155,19 @@ CLIENT_URL=http://localhost:5173
 NODE_ENV=development
 ```
 
-> **Note on macOS**: Port `5001` is used by default because port `5000` is reserved by macOS AirPlay Receiver (`AirTunes`).
+> **macOS Note**: Port `5001` is used by default because port `5000` is reserved by the macOS AirPlay Receiver (`AirTunes`).
 
 ---
 
 ## Getting Started
 
 ### Prerequisites
-- Node.js (v18+)
-- MongoDB (running locally or MongoDB Atlas connection string)
+- **Node.js**: v18.0.0 or higher
+- **MongoDB**: Local MongoDB daemon or MongoDB Atlas URI
 
 ### Installation
 
-1. Clone repository:
+1. Clone the repository:
    ```bash
    git clone https://github.com/shiv-pencia/SmartHostel-.git
    cd SmartHostel-
@@ -150,7 +179,7 @@ NODE_ENV=development
    npm install
    ```
 
-3. Ensure `.env` is set up with valid credentials in `server/.env`.
+3. Ensure `.env` is populated with valid values in `server/.env`.
 
 ### Running the Server
 
@@ -163,67 +192,92 @@ NODE_ENV=development
   npm start
   ```
 
+### Running Automated Tests
+
+The backend includes a comprehensive integration test suite running on Node's native test runner with `supertest` and `mongodb-memory-server` (no external MongoDB instance required):
+
+```bash
+cd server
+npm test
+```
+
+### Bootstrapping an Admin Account
+
+To promote the first registered user to administrator in a development environment:
+
+1. Register an initial user (e.g. `admin@hostel.edu`) via the `/api/v1/auth/register` API.
+2. Run the bootstrap script:
+   ```bash
+   cd server
+   BOOTSTRAP_ADMIN_EMAIL="admin@hostel.edu" node scripts/bootstrap-admin.js
+   ```
+
 ---
 
-## API Documentation & Sample Data
+## API Documentation
 
 Base URL: `http://localhost:5001`
 
-### 1. Health Check
+> [!IMPORTANT]
+> **CSRF Protection Header**: All state-mutating requests (`POST`, `PATCH`, `PUT`, `DELETE`) require the `X-Requested-With: XMLHttpRequest` header. Requests without this header or from untrusted origins are rejected with `403 Forbidden`.
 
-Checks whether the API server is healthy and running.
+---
+
+### Authentication Endpoints
+
+#### 1. Health Check
+
+Checks if the server is alive and operational.
 
 - **Method**: `GET`
 - **Route**: `/api/v1/health`
 - **Authentication**: None
 
-#### Sample Request
 ```bash
 curl -X GET http://localhost:5001/api/v1/health
 ```
 
-#### Sample Response (`200 OK`)
+**Response (`200 OK`)**:
 ```json
 {
   "success": true,
-  "message": "Smart Hostel API is running",
-  "environment": "development"
+  "message": "Smart Hostel API is running"
 }
 ```
 
 ---
 
-### 2. User Registration
+#### 2. User Registration
 
-Registers a new student account with Zod schema validation and registration rate limiting (5 attempts/hour).
+Registers a new student account with strict Zod validation and rate limiting.
 
 - **Method**: `POST`
 - **Route**: `/api/v1/auth/register`
-- **Rate Limit**: 5 attempts per IP per hour (`registerLimiter`)
-- **Validation**: Strict Zod schema (`registerSchema`)
-- **Content-Type**: `application/json`
+- **Rate Limit**: 5 attempts per IP per hour
+- **Required Headers**: `Content-Type: application/json`, `X-Requested-With: XMLHttpRequest`
 
-#### Request Body Schema
+**Request Body Schema**:
 | Field | Type | Required | Constraints |
 | :--- | :--- | :--- | :--- |
 | `name` | String | Yes | 2 to 100 characters, trimmed |
-| `email` | String | Yes | Valid email format, trimmed, lowercase |
+| `email` | String | Yes | Valid email format, lowercase |
 | `password` | String | Yes | 8 to 128 characters, max 72 bytes |
 | `phone` | String | No | 10 to 15 digits, optional `+` prefix |
 
-#### Sample Request
+**Sample Request**:
 ```bash
 curl -X POST http://localhost:5001/api/v1/auth/register \
   -H "Content-Type: application/json" \
+  -H "X-Requested-With: XMLHttpRequest" \
   -d '{
     "name": "Shiv Prakash",
     "email": "shiv@example.com",
-    "password": "password123",
+    "password": "StudentPass@123",
     "phone": "+919876543210"
   }'
 ```
 
-#### Sample Response (`201 Created`)
+**Response (`201 Created`)**:
 ```json
 {
   "success": true,
@@ -237,75 +291,40 @@ curl -X POST http://localhost:5001/api/v1/auth/register \
       "role": "student",
       "isActive": true,
       "lastLoginAt": null,
-      "createdAt": "2026-10-11T13:06:21.334Z",
-      "updatedAt": "2026-10-11T13:06:21.334Z"
+      "createdAt": "2026-10-12T10:00:00.000Z",
+      "updatedAt": "2026-10-12T10:00:00.000Z"
     }
   }
 }
 ```
 
-#### Error Response (`400 Bad Request - Validation Failure`)
-```json
-{
-  "success": false,
-  "message": "Request validation failed",
-  "errors": [
-    {
-      "field": "name",
-      "message": "Name must have at least 2 characters"
-    },
-    {
-      "field": "email",
-      "message": "Invalid email address"
-    },
-    {
-      "field": "password",
-      "message": "Password must have at least 8 characters"
-    }
-  ]
-}
-```
-
-#### Error Response (`409 Conflict - Duplicate Email`)
-```json
-{
-  "success": false,
-  "message": "Email is already registered"
-}
-```
-
 ---
 
-### 3. User Login
+#### 3. User Login
 
-Authenticates a user with login rate limiting and sets an `accessToken` HTTP-only cookie.
+Authenticates user credentials, sets an `accessToken` HTTP-only cookie, and logs the login timestamp.
 
 - **Method**: `POST`
 - **Route**: `/api/v1/auth/login`
-- **Rate Limit**: 10 failed attempts per IP per 15 mins (`loginLimiter`)
-- **Validation**: Strict Zod schema (`loginSchema`)
-- **Content-Type**: `application/json`
+- **Rate Limit**: 10 failed attempts per IP per 15 minutes
+- **Required Headers**: `Content-Type: application/json`, `X-Requested-With: XMLHttpRequest`
 
-#### Request Body Schema
-| Field | Type | Required | Constraints |
-| :--- | :--- | :--- | :--- |
-| `email` | String | Yes | Valid email format, trimmed, lowercase |
-| `password` | String | Yes | 1 to 128 characters |
-
-#### Sample Request
+**Sample Request**:
 ```bash
 curl -i -X POST http://localhost:5001/api/v1/auth/login \
   -H "Content-Type: application/json" \
+  -H "X-Requested-With: XMLHttpRequest" \
   -d '{
     "email": "shiv@example.com",
-    "password": "password123"
+    "password": "StudentPass@123"
   }'
 ```
 
-#### Sample Response (`200 OK`)
-```json
+**Response (`200 OK`)**:
+```http
 HTTP/1.1 200 OK
 Set-Cookie: accessToken=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...; Max-Age=900; Path=/; HttpOnly; SameSite=Lax
+Cache-Control: no-store
 
 {
   "success": true,
@@ -315,114 +334,252 @@ Set-Cookie: accessToken=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...; Max-Age=900; Pa
       "id": "6acb89cdcca5f3892ad245b6",
       "name": "Shiv Prakash",
       "email": "shiv@example.com",
-      "phone": "+919876543210",
       "role": "student",
       "isActive": true,
-      "lastLoginAt": "2026-10-11T13:06:34.648Z",
-      "createdAt": "2026-10-11T13:06:21.334Z",
-      "updatedAt": "2026-10-11T13:06:34.648Z"
+      "lastLoginAt": "2026-10-12T10:05:00.000Z"
     }
   }
 }
 ```
 
-#### Error Response (`401 Unauthorized`)
-```json
-{
-  "success": false,
-  "message": "Invalid email or password"
-}
+---
+
+#### 4. User Logout (Session Revocation)
+
+Revokes the active JWT access token in MongoDB using its cryptographic identifier (`jti`) and clears the HTTP-only cookie.
+
+- **Method**: `POST`
+- **Route**: `/api/v1/auth/logout`
+- **Authentication**: Optional (clears cookies regardless, revokes token if valid)
+- **Required Headers**: `X-Requested-With: XMLHttpRequest`
+
+**Sample Request**:
+```bash
+curl -i -X POST http://localhost:5001/api/v1/auth/logout \
+  -H "X-Requested-With: XMLHttpRequest" \
+  --cookie "accessToken=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 ```
 
-#### Error Response (`429 Too Many Requests`)
+**Response (`200 OK`)**:
 ```json
 {
-  "success": false,
-  "message": "Too many requests. Please try again later."
+  "success": true,
+  "message": "Logout successful"
 }
 ```
 
 ---
 
-### 4. Profile Verification (Protected)
+#### 5. Current User Profile (`/me`)
 
-Verifies the user's active session using the `accessToken` cookie.
+Retrieves the currently authenticated user's profile.
 
 - **Method**: `GET`
-- **Route**: `/api/v1/auth/profile-check`
+- **Route**: `/api/v1/auth/me`
 - **Authentication**: Required (`accessToken` Cookie)
 
-#### Sample Request (with Cookie)
+**Sample Request**:
 ```bash
-curl -X GET http://localhost:5001/api/v1/auth/profile-check \
+curl -X GET http://localhost:5001/api/v1/auth/me \
   --cookie "accessToken=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 ```
 
-#### Sample Response (`200 OK`)
+**Response (`200 OK`)**:
 ```json
 {
   "success": true,
-  "message": "Authentication successful",
+  "message": "Current user retrieved successfully",
   "data": {
     "user": {
+      "id": "6acb89cdcca5f3892ad245b6",
+      "name": "Shiv Prakash",
+      "email": "shiv@example.com",
+      "role": "student",
+      "isActive": true
+    }
+  }
+}
+```
+
+---
+
+#### 6. Development Verification Routes
+
+Available when `NODE_ENV=development`:
+- `GET /api/v1/auth/profile-check`: Any valid authenticated user
+- `GET /api/v1/auth/warden-check`: Only users with `warden` or `admin` role
+
+---
+
+### Admin User Management Endpoints
+
+All routes under `/api/v1/users` require an authenticated user with `role: "admin"`.
+
+#### 7. List All Users (Paginated & Filterable)
+
+Lists user accounts with query-based filtering and pagination.
+
+- **Method**: `GET`
+- **Route**: `/api/v1/users`
+- **Authentication**: Required (`admin`)
+- **Query Parameters**:
+  - `page`: Page number (integer, min: 1, default: `1`)
+  - `limit`: Items per page (integer, min: 1, max: 100, default: `10`)
+  - `search`: Case-insensitive text search matching `name` or `email`
+  - `role`: Filter by role (`student`, `warden`, `staff`, `admin`)
+  - `status`: Filter by account status (`active`, `inactive`)
+
+**Sample Request**:
+```bash
+curl -X GET "http://localhost:5001/api/v1/users?role=student&status=active&page=1&limit=10" \
+  --cookie "accessToken=ADMIN_TOKEN..."
+```
+
+**Response (`200 OK`)**:
+```json
+{
+  "success": true,
+  "message": "Users retrieved successfully",
+  "data": [
+    {
       "id": "6acb89cdcca5f3892ad245b6",
       "name": "Shiv Prakash",
       "email": "shiv@example.com",
       "phone": "+919876543210",
       "role": "student",
       "isActive": true,
-      "lastLoginAt": "2026-10-11T13:06:34.648Z",
-      "createdAt": "2026-10-11T13:06:21.334Z",
-      "updatedAt": "2026-10-11T13:06:34.648Z"
+      "createdAt": "2026-10-12T10:00:00.000Z"
     }
+  ],
+  "meta": {
+    "page": 1,
+    "limit": 10,
+    "total": 1,
+    "totalPages": 1
   }
 }
 ```
 
-#### Error Response (`401 Unauthorized - No Cookie`)
-```json
-{
-  "success": false,
-  "message": "Authentication required. Please login."
-}
-```
-
 ---
 
-### 5. Role-Based Access Check (Warden / Admin)
+#### 8. Get User by ID
 
-Validates whether the authenticated user has administrative or warden privileges.
+Fetches a single user record by their MongoDB ID.
 
 - **Method**: `GET`
-- **Route**: `/api/v1/auth/warden-check`
-- **Authentication**: Required (`role: "admin"` or `"warden"`)
+- **Route**: `/api/v1/users/:userId`
+- **Authentication**: Required (`admin`)
 
-#### Error Response (`403 Forbidden - Role Not Permitted`)
-```json
-{
-  "success": false,
-  "message": "You do not have permission to access this resource"
-}
+**Sample Request**:
+```bash
+curl -X GET http://localhost:5001/api/v1/users/6acb89cdcca5f3892ad245b6 \
+  --cookie "accessToken=ADMIN_TOKEN..."
 ```
 
 ---
 
-## Validation & Security Architecture
+#### 9. Update Basic User Details
+
+Updates non-sensitive profile information (`name`, `phone`).
+
+- **Method**: `PATCH`
+- **Route**: `/api/v1/users/:userId`
+- **Authentication**: Required (`admin`)
+- **Required Headers**: `Content-Type: application/json`, `X-Requested-With: XMLHttpRequest`
+
+**Sample Request**:
+```bash
+curl -X PATCH http://localhost:5001/api/v1/users/6acb89cdcca5f3892ad245b6 \
+  -H "Content-Type: application/json" \
+  -H "X-Requested-With: XMLHttpRequest" \
+  --cookie "accessToken=ADMIN_TOKEN..." \
+  -d '{
+    "name": "Shiv Pencia",
+    "phone": "+919876543299"
+  }'
+```
+
+---
+
+#### 10. Activate / Deactivate User Status
+
+Enables or disables a user account. Deactivated users cannot log in or authenticate.
+
+- **Method**: `PATCH`
+- **Route**: `/api/v1/users/:userId/status`
+- **Authentication**: Required (`admin`)
+- **Required Headers**: `Content-Type: application/json`, `X-Requested-With: XMLHttpRequest`
+- **Safety Guards**:
+  - Administrators cannot deactivate their own account (`403 Forbidden`).
+  - Administrator accounts cannot have their status altered through this endpoint (`403 Forbidden`).
+
+**Sample Request**:
+```bash
+curl -X PATCH http://localhost:5001/api/v1/users/6acb89cdcca5f3892ad245b6/status \
+  -H "Content-Type: application/json" \
+  -H "X-Requested-With: XMLHttpRequest" \
+  --cookie "accessToken=ADMIN_TOKEN..." \
+  -d '{ "isActive": false }'
+```
+
+---
+
+#### 11. Update User Role
+
+Reassigns a user's role to `student`, `warden`, or `staff`.
+
+- **Method**: `PATCH`
+- **Route**: `/api/v1/users/:userId/role`
+- **Authentication**: Required (`admin`)
+- **Required Headers**: `Content-Type: application/json`, `X-Requested-With: XMLHttpRequest`
+- **Safety Guards**:
+  - Administrators cannot change their own role (`403 Forbidden`).
+  - Existing administrators cannot be demoted via this endpoint (`403 Forbidden`).
+  - Promoting accounts directly to `admin` is blocked; initial admin setup uses the bootstrap script (`403 Forbidden`).
+
+**Sample Request**:
+```bash
+curl -X PATCH http://localhost:5001/api/v1/users/6acb89cdcca5f3892ad245b6/role \
+  -H "Content-Type: application/json" \
+  -H "X-Requested-With: XMLHttpRequest" \
+  --cookie "accessToken=ADMIN_TOKEN..." \
+  -d '{ "role": "warden" }'
+```
+
+---
+
+## Security & Validation Architecture
+
+### CSRF Protection & Custom Header Requirement
+
+All mutating HTTP requests (`POST`, `PATCH`, `PUT`, `DELETE`) are processed by [`csrf.middleware.js`](server/src/middlewares/csrf.middleware.js):
+1. **Origin Verification**: Requests containing an `Origin` header that does not match `CLIENT_URL` are rejected.
+2. **Custom Header Enforcement**: Requests must supply `X-Requested-With: XMLHttpRequest`. Standard HTML forms or unauthorized cross-site scripts cannot submit custom headers without explicitly granted CORS preflight permissions.
+
+### Token Revocation & Session Management
+
+1. **Cryptographic `jti`**: Every JWT issued contains a distinct UUID in the `jti` claim.
+2. **Revocation Blacklist**: When a user logs out (`POST /auth/logout`), the token's `jti` is hashed with SHA-256 and stored in the `revoked_tokens` MongoDB collection via [`session.service.js`](server/src/services/session.service.js).
+3. **Automatic TTL Index**: The `revoked_tokens` collection defines an index with `{ expireAfterSeconds: 0 }` on `expiresAt`. MongoDB automatically removes revoked records after their natural expiration date, preventing database bloat.
+4. **Replay Rejection**: If an attacker attempts to replay a cookie or stolen token after logout, [`auth.middleware.js`](server/src/middlewares/auth.middleware.js) checks `isTokenRevoked()` and rejects the session immediately with `401 Unauthorized`.
 
 ### Request Validation with Zod
 
-The application uses **Zod** (`zod`) schemas wrapped by [`validate.middleware.js`](file:///Users/shivprakash/Desktop/DBMS_PROJECT/smart-hostel/server/src/middlewares/validate.middleware.js) to enforce strict request validation:
-- Input sanitization (`trim`, `toLowerCase`)
-- Field type and boundary enforcement (`min`, `max`, `regex`)
-- Bcrypt password limit enforcement (max 72 bytes)
-- Unknown fields rejection via `z.strictObject()`
-- Standardized error format returning `field` and `message` list
+- Strict object enforcement (`z.strictObject()`) rejects extraneous properties.
+- Normalization (trimming, lowercase for emails).
+- Enforces bcrypt safe password limits (max 72 bytes).
+- Detailed validation error responses map each issue to its corresponding field name.
 
 ### Dedicated Authentication Rate Limiters
 
-Configured in [`authRateLimit.middleware.js`](file:///Users/shivprakash/Desktop/DBMS_PROJECT/smart-hostel/server/src/middlewares/authRateLimit.middleware.js):
-- **Registration Limiter**: 5 requests / IP / hour (prevents bot account creation spam).
-- **Login Limiter**: 10 failed requests / IP / 15 minutes with `skipSuccessfulRequests: true` (prevents brute-force credential stuffing while not penalizing legitimate logins).
+- **Registration Limiter**: 5 requests / IP / hour.
+- **Login Limiter**: 10 failed attempts / IP / 15 minutes (`skipSuccessfulRequests: true`).
+
+### Centralized Error Handling
+
+Implemented in [`error.middleware.js`](server/src/middlewares/error.middleware.js):
+- Handles Mongoose `ValidationError`, `CastError`, MongoDB unique duplicate key (`11000`), and malformed JSON syntax.
+- Sanitizes error outputs in production (`500 Internal Server Error` stacks are never exposed to clients).
 
 ---
 
@@ -431,36 +588,49 @@ Configured in [`authRateLimit.middleware.js`](file:///Users/shivprakash/Desktop/
 ```mermaid
 sequenceDiagram
     autonumber
-    actor Client as Client (React / Postman)
-    participant Limiter as Auth Rate Limiter
+    actor Client as Frontend Client
+    participant CSRF as CSRF Middleware
+    participant Limiter as Rate Limiter
     participant Validator as Zod Validator
-    participant AuthRouter as Auth Routes
     participant AuthCtrl as Auth Controller
-    participant AuthService as Auth Service
+    participant Service as Auth / Session Service
     participant DB as MongoDB
-    
-    Client->>Limiter: POST /api/v1/auth/login { email, password }
-    Limiter->>Validator: Pass rate check
-    Validator->>AuthRouter: Validated & normalized body
-    AuthRouter->>AuthCtrl: login(req, res)
-    AuthCtrl->>AuthService: loginUser(credentials)
-    AuthService->>DB: User.findOne({ email }).select('+password')
-    DB-->>AuthService: user document
-    AuthService->>AuthService: comparePassword(candidatePassword)
-    AuthService->>AuthService: generateAccessToken(user._id)
-    AuthService-->>AuthCtrl: { user, accessToken }
-    AuthCtrl-->>Client: Set-Cookie: accessToken (HttpOnly) + 200 OK { user }
+
+    Client->>CSRF: POST /api/v1/auth/login + X-Requested-With
+    CSRF->>Limiter: Origin & Header Verified
+    Limiter->>Validator: Rate limit check passed
+    Validator->>AuthCtrl: Validated { email, password }
+    AuthCtrl->>Service: loginUser(credentials)
+    Service->>DB: User.findOne({ email }).select('+password')
+    DB-->>Service: user document
+    Service->>Service: bcrypt.compare()
+    Service->>Service: generateAccessToken(user._id, jti)
+    Service-->>AuthCtrl: { user, accessToken }
+    AuthCtrl-->>Client: Set-Cookie: accessToken (HttpOnly) + 200 OK
+
+    Note over Client, DB: Later: User Logs Out
+    Client->>CSRF: POST /api/v1/auth/logout + X-Requested-With
+    CSRF->>AuthCtrl: Request allowed
+    AuthCtrl->>Service: revokeAccessToken(cookie)
+    Service->>DB: RevokedToken.create({ tokenIdHash, expiresAt })
+    AuthCtrl-->>Client: Clear-Cookie + 200 OK
+
+    Note over Client, DB: Token Replay Attempt
+    Client->>AuthCtrl: GET /api/v1/auth/me (replayed cookie)
+    AuthCtrl->>DB: Check RevokedToken.exists(tokenIdHash)
+    DB-->>AuthCtrl: Revoked found!
+    AuthCtrl-->>Client: 401 Session has been revoked
 ```
 
 ---
 
 ## Git Branching Strategy
 
-The repository follows a multi-branch team collaboration structure:
+The repository follows a collaborative branch workflow:
 
-| Branch | Purpose |
+| Branch | Description |
 | :--- | :--- |
 | **`main`** | Production-ready stable release branch |
-| **`shiv`** | Shiv's active development branch |
+| **`shiv`** | Shiv's development branch (features & authentication) |
 | **`prinjam`** | Prinjam's feature branch |
 | **`sourabh`** | Sourabh's feature branch |

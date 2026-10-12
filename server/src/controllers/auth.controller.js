@@ -1,14 +1,21 @@
 
 import * as authService from "../services/auth.service.js";
 
+import {
+    revokeAccessToken,
+} from "../services/session.service.js";
+
 import asyncHandler from "../utils/asyncHandler.js";
 import { sendSuccess } from "../utils/response.js";
 import env from "../config/env.js";
 
-// Cookie configuration
 const ACCESS_TOKEN_COOKIE = "accessToken";
 
-const accessTokenCookieOptions = {
+/*
+ * Cookie configuration
+ */
+
+const cookieOptions = {
     httpOnly: true,
     secure: env.nodeEnv === "production",
     sameSite: "lax",
@@ -16,32 +23,93 @@ const accessTokenCookieOptions = {
     maxAge: 15 * 60 * 1000,
 };
 
-// Register a new student
-export const register = asyncHandler(async (req, res) => {
-    const user = await authService.registerStudent(req.body);
+const {
+    maxAge,
+    ...clearCookieOptions
+} = cookieOptions;
 
-    return sendSuccess(res, {
-        statusCode: 201,
-        message: "Student registered successfully",
-        data: { user },
-    });
-});
+/*
+ * REGISTER
+ */
 
-// Login an existing user
-export const login = asyncHandler(async (req, res) => {
-    const { user, accessToken } = await authService.loginUser(
-        req.body
-    );
+export const register = asyncHandler(
+    async (req, res) => {
+        const user = await authService.registerStudent(
+            req.body
+        );
 
-    res.cookie(
-        ACCESS_TOKEN_COOKIE,
-        accessToken,
-        accessTokenCookieOptions
-    );
+        return sendSuccess(res, {
+            statusCode: 201,
+            message: "Student registered successfully",
+            data: { user },
+        });
+    }
+);
 
-    return sendSuccess(res, {
-        statusCode: 200,
-        message: "Login successful",
-        data: { user },
-    });
-});
+/*
+ * LOGIN
+ */
+
+export const login = asyncHandler(
+    async (req, res) => {
+        const { user, accessToken } =
+            await authService.loginUser(req.body);
+
+        res.cookie(
+            ACCESS_TOKEN_COOKIE,
+            accessToken,
+            cookieOptions
+        );
+
+        res.set("Cache-Control", "no-store");
+
+        return sendSuccess(res, {
+            message: "Login successful",
+            data: { user },
+        });
+    }
+);
+
+/*
+ * LOGOUT
+ */
+
+export const logout = asyncHandler(
+    async (req, res) => {
+
+        const token = req.cookies?.accessToken;
+
+        // Revoke valid JWT in MongoDB
+        await revokeAccessToken(token);
+
+        // Clear browser cookie
+        res.clearCookie(
+            ACCESS_TOKEN_COOKIE,
+            clearCookieOptions
+        );
+
+        res.set("Cache-Control", "no-store");
+
+        return sendSuccess(res, {
+            message: "Logout successful",
+        });
+    }
+);
+
+/*
+ * GET CURRENT USER
+ */
+
+export const getCurrentUser = asyncHandler(
+    async (req, res) => {
+
+        res.set("Cache-Control", "no-store");
+
+        return sendSuccess(res, {
+            message: "Current user retrieved successfully",
+            data: {
+                user: req.user,
+            },
+        });
+    }
+);

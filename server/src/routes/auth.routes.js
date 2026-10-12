@@ -4,6 +4,8 @@ import { Router } from "express";
 import {
     register,
     login,
+    logout,
+    getCurrentUser,
 } from "../controllers/auth.controller.js";
 
 import validate from "../middlewares/validate.middleware.js";
@@ -27,10 +29,10 @@ import env from "../config/env.js";
 const router = Router();
 
 /*
- * PUBLIC ROUTES
+ * PUBLIC AUTHENTICATION ROUTES
  */
 
-// Student registration
+// Register a student
 router.post(
     "/register",
     registerLimiter,
@@ -38,7 +40,7 @@ router.post(
     register
 );
 
-// User login
+// Login
 router.post(
     "/login",
     loginLimiter,
@@ -46,27 +48,40 @@ router.post(
     login
 );
 
+// Logout
+// Public so expired sessions can clear their cookies
+router.post(
+    "/logout",
+    logout
+);
+
+/*
+ * PROTECTED AUTHENTICATION ROUTES
+ */
+
+// Get currently authenticated user
+router.get(
+    "/me",
+    authenticate,
+    getCurrentUser
+);
+
 /*
  * TEMPORARY DEVELOPMENT TEST ROUTES
  */
 
 if (env.nodeEnv === "development") {
-
-    // Any authenticated user
     router.get(
         "/profile-check",
         authenticate,
         (req, res) => {
             return sendSuccess(res, {
                 message: "Authentication successful",
-                data: {
-                    user: req.user,
-                },
+                data: { user: req.user },
             });
         }
     );
 
-    // Only admin or warden
     router.get(
         "/warden-check",
         authenticate,
@@ -74,13 +89,10 @@ if (env.nodeEnv === "development") {
         (req, res) => {
             return sendSuccess(res, {
                 message: "Authorization successful",
-                data: {
-                    user: req.user,
-                },
+                data: { user: req.user },
             });
         }
     );
-
 }
 
 export default router;

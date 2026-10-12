@@ -1,130 +1,194 @@
 
+import mongoose from "mongoose";
+
 import User from "../models/user.model.js";
 import ApiError from "../utils/ApiError.js";
-import { generateAccessToken } from "../utils/token.js";
 
-// Shared helpers
-const normalizeEmail = (email) => {
-  return email.trim().toLowerCase();
+/*
+ * Shared helpers
+ */
+
+const findUserOrThrow = async (userId) => {
+  if (!mongoose.isObjectIdOrHexString(userId)) {
+    throw new ApiError(400, "Invalid user ID");
+  }
+
+  const user = await User.findById(userId);
+
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
+
+  return user;
 };
 
-const validatePassword = (password) => {
-  if (typeof password !== "string") {
-    throw new ApiError(400, "Password is required");
-  }
-
-  if (password.length < 8) {
-    throw new ApiError(
-      400,
-      "Password must contain at least 8 characters"
-    );
-  }
-
-  // bcrypt processes at most 72 bytes of input
-  if (Buffer.byteLength(password, "utf8") > 72) {
-    throw new ApiError(
-      400,
-      "Password cannot exceed 72 bytes"
-    );
-  }
+const escapeRegExp = (value) => {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 };
 
-// Register a new student
-export const registerStudent = async (userData) => {
-  const { name, email, password, phone } = userData ?? {};
+/*
+ * LIST USERS
+ */
 
-  if (
-    typeof name !== "string" ||
-    typeof email !== "string" ||
-    !name.trim() ||
-    !email.trim()
-  ) {
-    throw new ApiError(
-      400,
-      "Name and email are required"
-    );
+export const listUsers = async (query) => {
+  const {
+    page,
+    limit,
+    search,
+    role,
+    status,
+  } = query;
+
+  const filter = {};
+
+  if (role) {
+    filter.role = role;
   }
 
-  validatePassword(password);
-
-  const normalizedEmail = normalizeEmail(email);
-
-  const existingUser = await User.findOne({
-    email: normalizedEmail,
-  });
-
-  if (existingUser) {
-    throw new ApiError(
-      409,
-      "Email is already registered"
-    );
+  if (status) {
+    filter.isActive = status === "active";
   }
 
-  const user = await User.create({
-    name: name.trim(),
-    email: normalizedEmail,
-    password,
-    phone,
-    role: "student",
-  });
+  if (search) {
+    const safeSearch = escapeRegExp(search);
+
+    filter.$or = [
+      {
+        name: {
+          $regex: safeSearch,
+          $options: "i",
+        },
+      },
+      {
+        email: {
+          $regex: safeSearch,
+          $options: "i",
+        },
+      },
+    ];
+  }
+
+  const skip = (page - 1) * limit;
+
+  const [users, total] = await Promise.all([
+    User.find(filter)
+      .sort({ createdAt: -1, _id: -1 })
+      .skip(skip)
+      .limit(limit),
+
+    User.countDocuments(filter),
+  ]);
+
+  return {
+    users: users.map((user) => user.toSafeObject()),
+    pagination: {
+      page,
+      limit,
+      total,
+      totalPages: Math.ceil(total / limit),
+    },
+  };
+};
+
+/*
+ * GET USER
+ */
+
+export const getUserById = async (userId) => {
+  const user = await findUserOrThrow(userId);
+  return user.toSafeObject();
+};
+
+/*
+ * UPDATE USER PROFILE
+ */
+
+export const updateUser = async (userId, data) => {
+  const user = await findUserOrThrow(userId);
+
+  if (data.name !== undefined) {
+    user.name = data.name;
+  }
+
+  if (data.phone !== undefined) {
+    user.phone = data.phone;
+  }
+
+  await user.save();
 
   return user.toSafeObject();
 };
 
-// Login an existing user
-export const loginUser = async (credentials) => {
-  const { email, password } = credentials ?? {};
+/*
+ * ACTIVATE / DEACTIVATE ACCOUNT
+ */
 
-  if (
-    typeof email !== "string" ||
-    typeof password !== "string" ||
-    !email.trim() ||
-    !password
-  ) {
-    throw new ApiError(
-      400,
-      "Email and password are required"
-    );
-  }
+export const updateUserStatus = async (
+  userId,
+  isActive,
+  actorId
+) => {
+  const user = await findUserOrThrow(userId);
 
-  const normalizedEmail = normalizeEmail(email);
-
-  const user = await User.findOne({
-    email: normalizedEmail,
-  }).select("+password");
-
-  if (!user) {
-    throw new ApiError(
-      401,
-      "Invalid email or password"
-    );
-  }
-
-  const isPasswordValid = await user.comparePassword(
-    password
-  );
-
-  if (!isPasswordValid) {
-    throw new ApiError(
-      401,
-      "Invalid email or password"
-    );
-  }
-
-  if (!user.isActive) {
+  if (user._id.toString() === actorId && !isActive) {
     throw new ApiError(
       403,
-      "Your account is deactivated"
+      "You cannot deactivate your own account"
     );
   }
 
-  const accessToken = generateAccessToken(user._id);
+  // Admin accounts require a separate workflow.
+  if (user.role === "admin") {
+    throw new ApiError(
+      403,
+      "Administrator account status cannot be changed here"
+    );
+  }
 
-  user.lastLoginAt = new Date();
+  user.isActive = isActive;
+
   await user.save();
 
-  return {
-    user: user.toSafeObject(),
-    accessToken,
-  };
+  return user.toSafeObject();
+};
+
+/*
+ * CHANGE USER ROLE
+ */
+
+export const updateUserRole = async (
+  userId,
+  role,
+  actorId
+) => {
+  const user = await findUserOrThrow(userId);
+
+  if (user._id.toString() === actorId) {
+    throw new ApiError(
+      403,
+      "You cannot change your own role"
+    );
+  }
+
+  // Existing admins cannot be demoted here.
+  if (user.role === "admin") {
+    throw new ApiError(
+      403,
+      "Administrator roles cannot be changed here"
+    );
+  }
+
+  // New admins must use a separate provisioning process.
+  if (role === "admin") {
+    throw new ApiError(
+      403,
+      "Administrator role assignment is restricted"
+    );
+  }
+
+  user.role = role;
+
+  await user.save();
+
+  return user.toSafeObject();
 };

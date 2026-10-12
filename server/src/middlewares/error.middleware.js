@@ -1,17 +1,22 @@
+
 import env from "../config/env.js";
 import ApiError from "../utils/ApiError.js";
 
 const errorMiddleware = (err, req, res, next) => {
+  if (res.headersSent) {
+    return next(err);
+  }
+
   let error = err;
 
-  /*
-   * Mongoose validation error
-   */
+  // Mongoose document validation
   if (err.name === "ValidationError") {
-    const errors = Object.values(err.errors).map((item) => ({
-      field: item.path,
-      message: item.message,
-    }));
+    const errors = Object.values(err.errors).map(
+      (item) => ({
+        field: item.path,
+        message: item.message,
+      })
+    );
 
     error = new ApiError(
       400,
@@ -20,48 +25,70 @@ const errorMiddleware = (err, req, res, next) => {
     );
   }
 
-  /*
-   * MongoDB duplicate key error
-   */
-  if (err.code === 11000) {
-    const fields = Object.keys(err.keyValue || {});
-
+  // Duplicate MongoDB unique index
+  else if (err.code === 11000) {
     error = new ApiError(
       409,
-      `Duplicate value for: ${fields.join(", ")}`
+      "A record with this unique value already exists"
     );
   }
 
-  /*
-   * Invalid MongoDB ObjectId
-   */
-  if (err.name === "CastError") {
+  // Invalid Mongoose type / ObjectId
+  else if (err.name === "CastError") {
     error = new ApiError(
       400,
-      `Invalid value for field: ${err.path}`
+      "Invalid database field value"
     );
   }
 
-  const statusCode = error.statusCode || 500;
+  // Invalid JSON request body
+  else if (err.type === "entity.parse.failed") {
+    error = new ApiError(
+      400,
+      "Malformed JSON request body"
+    );
+  }
+
+  const statusCode = (
+    Number.isInteger(error.statusCode) &&
+    error.statusCode >= 400 &&
+    error.statusCode <= 599
+  )
+    ? error.statusCode
+    : 500;
+
+  // Never reveal unexpected internal errors in production.
+  const isInternalError = statusCode >= 500;
+
+  if (isInternalError) {
+    console.error("Internal server error:", err);
+  }
+
+  const message = (
+    env.nodeEnv === "production" &&
+    isInternalError
+  )
+    ? "Internal server error"
+    : error.message || "Internal server error";
 
   const response = {
     success: false,
-    message:
-      error.message || "Internal server error",
+    message,
   };
 
-  if (error.errors?.length) {
+  if (
+    !isInternalError &&
+    Array.isArray(error.errors) &&
+    error.errors.length > 0
+  ) {
     response.errors = error.errors;
   }
 
-  /*
-   * Don't expose stack traces in production
-   */
   if (env.nodeEnv === "development") {
     response.stack = error.stack;
   }
 
-  res.status(statusCode).json(response);
+  return res.status(statusCode).json(response);
 };
 
 export default errorMiddleware;

@@ -2,25 +2,26 @@
 import mongoose from "mongoose";
 
 import User from "../models/user.model.js";
-import { verifyAccessToken } from "../utils/token.js";
+
+import {
+    verifyAccessToken,
+} from "../utils/token.js";
+
+import {
+    isTokenRevoked,
+} from "../services/session.service.js";
+
 import ApiError from "../utils/ApiError.js";
 import asyncHandler from "../utils/asyncHandler.js";
 
 /*
- * Authentication Middleware
- *
- * 1. Extract JWT from HTTP-only cookie
- * 2. Verify the JWT
- * 3. Extract user ID from token
- * 4. Find user in MongoDB
- * 5. Check account status
- * 6. Attach user to req.user
+ * Authenticate incoming requests
  */
 
 export const authenticate = asyncHandler(
     async (req, res, next) => {
 
-        // Step 1: Extract token
+        // Read JWT from HTTP-only cookie
         const token = req.cookies?.accessToken;
 
         if (!token) {
@@ -30,22 +31,31 @@ export const authenticate = asyncHandler(
             );
         }
 
-        // Step 2: Verify JWT signature and expiry
-        const decoded = verifyAccessToken(token);
+        // Verify signature and expiry
+        const payload = verifyAccessToken(token);
 
-        // Step 3: Validate user ID from JWT
-        if (
-            typeof decoded.sub !== "string" ||
-            !mongoose.isObjectIdOrHexString(decoded.sub)
-        ) {
+        // Validate MongoDB user ID
+        if (!mongoose.isObjectIdOrHexString(payload.sub)) {
             throw new ApiError(
                 401,
-                "Invalid authentication token"
+                "Invalid access token"
             );
         }
 
-        // Step 4: Find current user in MongoDB
-        const user = await User.findById(decoded.sub);
+        // Check the token revocation list
+        const revoked = await isTokenRevoked(
+            payload.jti
+        );
+
+        if (revoked) {
+            throw new ApiError(
+                401,
+                "Session has been revoked. Please login again."
+            );
+        }
+
+        // Load user from database
+        const user = await User.findById(payload.sub);
 
         if (!user) {
             throw new ApiError(
@@ -54,7 +64,6 @@ export const authenticate = asyncHandler(
             );
         }
 
-        // Step 5: Check whether account is active
         if (!user.isActive) {
             throw new ApiError(
                 403,
@@ -62,10 +71,9 @@ export const authenticate = asyncHandler(
             );
         }
 
-        // Step 6: Attach safe user details to request
+        // Add authenticated user to request
         req.user = user.toSafeObject();
 
-        // Step 7: Continue to next middleware/controller
         next();
     }
 );
