@@ -70,7 +70,12 @@ The Smart Hostel system streamlines campus housing operations, student accommoda
 - **Tooling & Bundler**: Vite 8
 - **Routing**: React Router v8 (`react-router`)
 - **Networking**: Axios (with custom CSRF interceptors and unified error formatting)
+- **Icons**: Lucide React (`lucide-react`)
 - **Styling**: Vanilla CSS with modern tokens, glassmorphism, responsive grids, and Google Fonts typography
+- **Testing & Quality Assurance**:
+  - Vitest (`vitest`) native ESM runner
+  - React Testing Library (`@testing-library/react`, `@testing-library/jest-dom`, `@testing-library/user-event`)
+  - `axios-mock-adapter` and `jsdom` for isolated browser DOM & mock HTTP network environments
 
 ### Backend
 - **Runtime**: Node.js (v18+, ES Modules)
@@ -105,32 +110,61 @@ smart-hostel/
 │   │   ├── assets/                       # UI illustrations & vector assets
 │   │   ├── components/                   # Shared reusable UI elements
 │   │   │   ├── common/
-│   │   │   │   └── BackendStatus.jsx     # Live backend connection indicator
+│   │   │   │   ├── BackendStatus.jsx     # Live backend connection indicator
+│   │   │   │   └── SessionStatus.jsx     # Active session & role status pill
+│   │   │   ├── dashboard/                # Reusable dashboard navigation & widgets
+│   │   │   │   ├── DashboardCard.jsx     # Metric & summary display cards
+│   │   │   │   ├── Sidebar.jsx           # Role-based collapsible navigation drawer
+│   │   │   │   └── Topbar.jsx            # Top app header with profile & session actions
 │   │   │   └── ui/                       # UI primitives
+│   │   ├── config/                       # Client configuration
+│   │   │   └── dashboardNavigation.js    # Role-specific navigation manifests
+│   │   ├── context/                      # Global React context providers
+│   │   │   ├── AuthContext.js            # Auth context definitions
+│   │   │   └── AuthProvider.jsx          # Session state provider (cookie-driven)
 │   │   ├── features/                     # Feature-sliced domain modules
 │   │   │   ├── auth/                     # Authentication domain
 │   │   │   │   ├── api/auth.api.js       # Register, login, logout, me API calls
 │   │   │   │   ├── components/           # LoginForm, RegisterForm
 │   │   │   │   ├── pages/                # LoginPage, RegisterPage
 │   │   │   │   └── styles/auth.css       # Scoped auth module styles
-│   │   │   ├── allocations/              # Room allocations (scaffold)
-│   │   │   ├── hostels/                  # Hostel blocks (scaffold)
-│   │   │   ├── rooms/                    # Room inventory (scaffold)
-│   │   │   └── users/                    # User management (scaffold)
+│   │   │   └── users/                    # Admin user management domain
+│   │   │       ├── api/users.api.js      # User query, role & status mutation APIs
+│   │   │       ├── components/           # UserTable, UserDetailsPanel
+│   │   │       ├── pages/                # AdminUsersPage
+│   │   │       └── styles/users.css      # User management tables & panels
+│   │   ├── hooks/                        # Custom React hooks
+│   │   │   └── useAuth.js                # Hook to consume AuthContext
 │   │   ├── layouts/
+│   │   │   ├── DashboardLayout.jsx       # Authenticated role dashboard shell
 │   │   │   └── PublicLayout.jsx          # Public navbar, status pill & footer
 │   │   ├── pages/                        # General pages
 │   │   │   ├── HomePage.jsx              # Landing showcase & role quick access
+│   │   │   ├── RoleDashboardPage.jsx     # Personalized role-based dashboard view
+│   │   │   ├── DashboardPage.jsx         # General dashboard landing
+│   │   │   ├── ModulePlaceholderPage.jsx # Modular placeholder for upcoming features
 │   │   │   ├── ComingSoonPage.jsx        # Modular placeholder page
 │   │   │   └── NotFoundPage.jsx          # 404 handler
-│   │   ├── routes/
-│   │   │   └── AppRoutes.jsx             # React Router configuration
+│   │   ├── routes/                       # Routing guards & configuration
+│   │   │   ├── AppRoutes.jsx             # React Router configuration
+│   │   │   ├── ProtectedRoute.jsx        # Authenticated session guard
+│   │   │   ├── RoleRoute.jsx             # Role-based access control (RBAC) guard
+│   │   │   └── GuestRoute.jsx            # Guest-only guard (redirects logged-in users)
 │   │   ├── styles/
-│   │   │   └── global.css                # CSS variables, typography & reset
-│   │   ├── App.jsx                       # Application shell
+│   │   │   ├── global.css                # CSS variables, typography & reset
+│   │   │   └── dashboard.css             # Dashboard layout & widget styles
+│   │   ├── test/                         # Frontend integration tests & mocks
+│   │   │   ├── auth.integration.test.jsx # Auth & routing integration tests
+│   │   │   ├── users.integration.test.jsx# Admin user management tests
+│   │   │   ├── mockBackend.js            # Axios mock adapter backend fixtures
+│   │   │   └── setup.js                  # Vitest environment setup
+│   │   ├── utils/                        # Frontend helper utilities
+│   │   │   └── rolePaths.js              # Role home routes & path helpers
+│   │   ├── App.jsx                       # Application shell with AuthProvider
 │   │   └── main.jsx                      # Client root mount
 │   ├── .env.example                      # Client environment template
 │   ├── vite.config.js                    # Vite bundler configuration
+│   ├── vitest.config.js                  # Vitest test suite configuration
 │   └── package.json
 │
 ├── server/                               # Backend REST API service (Node.js / Express)
@@ -307,11 +341,21 @@ Frontend will be accessible at: `http://localhost:5173`
 
 ### Running Automated Tests
 
+#### Backend Integration Tests
 The backend includes a zero-dependency integration test suite running on Node's native test runner with `supertest` and `mongodb-memory-server` (an external MongoDB instance is not required):
 
 ```bash
 cd server
 npm test
+```
+
+#### Frontend Integration Tests
+The frontend includes a full Vitest and React Testing Library suite testing authentication flows, route guards, user tables, search/filter interactions, status toggling, and role mutations:
+
+```bash
+cd client
+npm test            # Run all client tests
+npm run test:watch  # Interactive watch mode
 ```
 
 ### Bootstrapping an Admin Account
@@ -331,23 +375,54 @@ To promote the first registered user to administrator in a development environme
 
 ### Key Frontend Features
 
-1. **Feature-Sliced Architecture**: Codebase divided into domain slices (`features/auth`, `features/rooms`, `features/hostels`, etc.) promoting reusability and scalability.
-2. **Interactive Auth Forms**:
-   - Client-side validation with real-time feedback.
-   - Password confirmation checks and length constraints (minimum 8 characters, maximum 72 bytes).
-   - Dynamic error banner with specific field error mapping from backend Zod responses.
-   - Disabled states during submission to prevent duplicate actions.
-3. **Live Backend Connectivity Monitor**: A real-time `BackendStatus` badge prominently placed in the header that pings `/api/v1/health` and provides instant feedback on backend availability.
-4. **Responsive Modern UI**: Custom CSS tokens with smooth transitions, clean typography, responsive navigation, and accessible forms (`aria-invalid`, `aria-describedby`).
+1. **Global Authentication State (`AuthProvider`)**:
+   - Automatic session hydration on mount via `GET /api/v1/auth/me`.
+   - Cookie-based authentication lifecycle with seamless login, logout, and token revocation.
+   - Request sequence tracking preventing stale responses from overriding active state.
+2. **Role-Based Access Control (RBAC) & Route Guards**:
+   - **`ProtectedRoute`**: Restricts internal views to authenticated users, remembering intended destination paths.
+   - **`RoleRoute`**: Enforces strict role access (`student`, `warden`, `staff`, `admin`), preventing unauthorized role escalation.
+   - **`GuestRoute`**: Guards guest-only pages (`/login`, `/register`), redirecting logged-in users to their respective role dashboards.
+3. **Responsive Dashboard System (`DashboardLayout`)**:
+   - Collapsible sidebar with navigation items tailored to the user's active role.
+   - Topbar featuring live session indicator (`SessionStatus`), user profile badge, and one-click session logout.
+   - Personalized `RoleDashboardPage` displaying targeted metric counters, quick actions, and role-specific module cards.
+4. **Admin User Management Portal (`AdminUsersPage`)**:
+   - Interactive data table with query search (name/email), role filter, and active/inactive status filter.
+   - Server-side paginated navigation with total record count and page indicators.
+   - Slide-out details drawer (`UserDetailsPanel`) allowing direct status toggles and role modifications with server safety confirmations.
+5. **Interactive Auth Forms**:
+   - Real-time client-side validation, password length bounds, and confirmation matching.
+   - Accessible form controls (`aria-invalid`, `role="alert"`).
+   - Submitting state feedback preventing duplicate requests.
+6. **Live Backend Connectivity Monitor**:
+   - Real-time `BackendStatus` badge querying `/api/v1/health` with instant status indicators (Operational, Offline, Checking).
 
 ### Application Routes
 
-| Path | View Component | Description |
-| :--- | :--- | :--- |
-| `/` | `HomePage` | Public landing page featuring platform statistics, features, and role-based access portals |
-| `/login` | `LoginPage` | User login portal for students and staff |
-| `/register` | `RegisterPage` | Student registration portal with live input validation |
-| `*` | `NotFoundPage` | Custom 404 page with return-to-home navigation |
+| Path | View Component | Access Guard | Description |
+| :--- | :--- | :--- | :--- |
+| `/` | `HomePage` | Public | Landing page featuring platform statistics, features, and role-based access portals |
+| `/login` | `LoginPage` | Guest-only | Student & administrator login portal |
+| `/register` | `RegisterPage` | Guest-only | Student registration portal with live input validation |
+| `/dashboard` | `DashboardRedirect` | Authenticated | Automatically redirects authenticated users to their role-specific home route |
+| `/admin` | `RoleDashboardPage` | `admin` | Administrator overview with system statistics & management shortcuts |
+| `/admin/users` | `AdminUsersPage` | `admin` | Full user management portal with search, filtering, status toggling, and role assignment |
+| `/admin/hostels` | `ModulePlaceholderPage` | `admin` | Hostel block management module |
+| `/admin/rooms` | `ModulePlaceholderPage` | `admin` | Room & bed inventory module |
+| `/admin/reports` | `ModulePlaceholderPage` | `admin` | Reports & system analytics module |
+| `/student` | `RoleDashboardPage` | `student` | Student overview with room info, complaint status, and quick links |
+| `/student/allocation` | `ModulePlaceholderPage` | `student` | Room and bed allocation details module |
+| `/student/complaints` | `ModulePlaceholderPage` | `student` | Maintenance complaint submission & tracking module |
+| `/student/notices` | `ModulePlaceholderPage` | `student` | Hostel notice board module |
+| `/warden` | `RoleDashboardPage` | `warden` | Warden overview with occupancy metrics, complaints, and visitor logs |
+| `/warden/rooms` | `ModulePlaceholderPage` | `warden` | Room inspection and occupancy management module |
+| `/warden/visitors` | `ModulePlaceholderPage` | `warden` | Visitor log and gate pass monitoring module |
+| `/warden/complaints` | `ModulePlaceholderPage` | `warden` | Student complaint assignment and resolution module |
+| `/staff` | `RoleDashboardPage` | `staff` | Maintenance staff overview with active repair tasks & workload |
+| `/staff/tasks` | `ModulePlaceholderPage` | `staff` | Assigned maintenance work orders module |
+| `/staff/maintenance` | `ModulePlaceholderPage` | `staff` | Maintenance history and completion logs module |
+| `*` | `NotFoundPage` | Public | Custom 404 page with return-to-home navigation |
 
 ### CSRF & API Client Configuration
 

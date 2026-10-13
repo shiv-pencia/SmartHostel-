@@ -78,7 +78,7 @@ httpClient.interceptors.response.use(
 
         const serverMessage = error.response?.data?.message;
 
-        let message = "Something went wrong";
+        let message;
 
         if (error.code === "ECONNABORTED") {
             message = "Request timed out. Please try again.";

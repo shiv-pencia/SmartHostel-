@@ -1,11 +1,19 @@
 
 import { useState } from "react";
-
 import {
-    loginUser,
-} from "../api/auth.api.js";
+    useNavigate,
+    useLocation,
+} from "react-router";
+
+import { useAuth } from "../../../hooks/useAuth.js";
+import { getRoleHome } from "../../../utils/rolePaths.js";
 
 function LoginForm() {
+    const navigate = useNavigate();
+    const location = useLocation();
+
+    const { login } = useAuth();
+
     const [formData, setFormData] = useState({
         email: "",
         password: "",
@@ -14,10 +22,9 @@ function LoginForm() {
     const [errors, setErrors] = useState({});
     const [serverError, setServerError] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [loggedInUser, setLoggedInUser] = useState(null);
 
     /*
-     * Handle changes in input fields
+     * Handle input changes
      */
     const handleChange = (event) => {
         const { name, value } = event.target;
@@ -36,17 +43,17 @@ function LoginForm() {
     };
 
     /*
-     * Simple client-side validation
+     * Validate form
      */
     const validateForm = () => {
         const nextErrors = {};
 
-        if (!formData.email.trim()) {
+        const email = formData.email.trim();
+
+        if (!email) {
             nextErrors.email = "Email is required";
         } else if (
-            !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
-                formData.email.trim()
-            )
+            !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
         ) {
             nextErrors.email = "Enter a valid email address";
         }
@@ -61,7 +68,7 @@ function LoginForm() {
     };
 
     /*
-     * Submit login form
+     * Submit login request
      */
     const handleSubmit = async (event) => {
         event.preventDefault();
@@ -72,23 +79,29 @@ function LoginForm() {
 
         setIsSubmitting(true);
         setServerError("");
-        setLoggedInUser(null);
 
         try {
-            const user = await loginUser({
+            // Calls Axios through AuthProvider
+            const user = await login({
                 email: formData.email.trim().toLowerCase(),
                 password: formData.password,
             });
 
-            setLoggedInUser(user);
+            // Redirect to the appropriate dashboard
+            const roleHome = getRoleHome(user.role);
+            const requestedPath = location.state?.from;
 
-            // No need to store JWT in localStorage.
-            // Browser receives the HTTP-only cookie.
+            // Allow an internal intended destination
+            const destination =
+                typeof requestedPath === "string" &&
+                    requestedPath.startsWith("/") &&
+                    !requestedPath.startsWith("//")
+                    ? requestedPath
+                    : roleHome;
 
-            setFormData((previous) => ({
-                ...previous,
-                password: "",
-            }));
+            navigate(destination, {
+                replace: true,
+            });
 
         } catch (error) {
             setServerError(
@@ -114,35 +127,10 @@ function LoginForm() {
         }
     };
 
-    /*
-     * Display successful login
-     */
-    if (loggedInUser) {
-        return (
-            <div className="auth-success" role="status">
-                <h2>Login successful</h2>
-
-                <p>
-                    Welcome, <strong>{loggedInUser.name}</strong>!
-                </p>
-
-                <p>
-                    Role: <strong>{loggedInUser.role}</strong>
-                </p>
-
-                <p>
-                    Your authentication cookie has been set.
-                    Role-based dashboards will be connected
-                    in Phase 3.6.
-                </p>
-            </div>
-        );
-    }
-
     return (
         <form
-            onSubmit={handleSubmit}
             className="auth-form"
+            onSubmit={handleSubmit}
             noValidate
         >
             {serverError && (
@@ -165,14 +153,11 @@ function LoginForm() {
                     value={formData.email}
                     onChange={handleChange}
                     aria-invalid={Boolean(errors.email)}
-                    aria-describedby={
-                        errors.email ? "login-email-error" : undefined
-                    }
                     required
                 />
 
                 {errors.email && (
-                    <p id="login-email-error" className="field-error">
+                    <p className="field-error" role="alert">
                         {errors.email}
                     </p>
                 )}
@@ -192,19 +177,11 @@ function LoginForm() {
                     value={formData.password}
                     onChange={handleChange}
                     aria-invalid={Boolean(errors.password)}
-                    aria-describedby={
-                        errors.password
-                            ? "login-password-error"
-                            : undefined
-                    }
                     required
                 />
 
                 {errors.password && (
-                    <p
-                        id="login-password-error"
-                        className="field-error"
-                    >
+                    <p className="field-error" role="alert">
                         {errors.password}
                     </p>
                 )}
