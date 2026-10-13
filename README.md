@@ -1,6 +1,6 @@
 # Smart Hostel Management System
 
-A modern, scalable Hostel Management System backend built with **Node.js**, **Express**, and **MongoDB (Mongoose)** featuring robust authentication, role-based access control (RBAC), token revocation & session management, CSRF protection, Zod request schema validation, dedicated brute-force rate limiters, admin bootstrap tooling, and an automated integration test suite.
+A modern, full-stack Hostel Management System featuring a **React 19** frontend built with **Vite** and a robust **Node.js / Express / MongoDB** backend. The system incorporates enterprise-grade authentication, role-based access control (RBAC), cryptographic token revocation, CSRF protection, strict Zod schema validation, dedicated brute-force rate limiters, admin bootstrap tooling, and an automated integration test suite.
 
 ---
 
@@ -8,14 +8,23 @@ A modern, scalable Hostel Management System backend built with **Node.js**, **Ex
 
 - [Overview](#overview)
 - [Tech Stack](#tech-stack)
+  - [Frontend](#frontend)
+  - [Backend](#backend)
 - [Project Architecture](#project-architecture)
 - [Environment Variables](#environment-variables)
+  - [Backend (`server/.env`)](#backend-serverenv)
+  - [Frontend (`client/.env`)](#frontend-clientenv)
 - [Getting Started](#getting-started)
   - [Prerequisites](#prerequisites)
   - [Installation](#installation)
-  - [Running the Server](#running-the-server)
+  - [Running the Backend](#running-the-backend)
+  - [Running the Frontend](#running-the-frontend)
   - [Running Automated Tests](#running-automated-tests)
   - [Bootstrapping an Admin Account](#bootstrapping-an-admin-account)
+- [Frontend Client Overview](#frontend-client-overview)
+  - [Key Frontend Features](#key-frontend-features)
+  - [Application Routes](#application-routes)
+  - [CSRF & API Client Configuration](#csrf--api-client-configuration)
 - [API Documentation](#api-documentation)
   - [Authentication Endpoints](#authentication-endpoints)
     - [1. Health Check](#1-health-check)
@@ -43,33 +52,43 @@ A modern, scalable Hostel Management System backend built with **Node.js**, **Ex
 
 ## Overview
 
-The Smart Hostel system automates and streamlines hostel administration tasks including:
-- **Secure Authentication & Session Lifecycle**: Student registration, password hashing with bcrypt, JWT issued with unique `jti`, HTTP-only cookies, token blacklisting/revocation upon logout, and CSRF protection.
-- **Role-Based Access Control (RBAC)**: Strict permission tiers for `student`, `warden`, `staff`, and `admin`.
-- **User Management**: Administrative APIs to list, filter, search, inspect, update, activate/deactivate, and reassign roles to users with built-in guardrails against self-demotion or self-lockout.
-- **Hostel Domain Schemas**: Modular Mongoose schemas for hostels, rooms, beds, allocations, complaints, fee structures, payment records, notices, and visitor logs.
-- **Enterprise Security**: Strict input validation with Zod, rate limiting, security HTTP headers with Helmet, and CORS origin whitelisting.
+The Smart Hostel system streamlines campus housing operations, student accommodation workflows, and residential facilities management:
+
+- **Full-Stack Architecture**: Modern React 19 client paired with a high-performance Express REST API and MongoDB ODM.
+- **Secure Authentication & Session Lifecycle**: Student self-registration, password hashing via bcrypt (12 rounds), JWT access tokens embedded with unique `jti` identifiers, HTTP-only secure cookies, cryptographic token revocation upon logout, and CSRF protection.
+- **Role-Based Access Control (RBAC)**: Fine-grained permission guards across `student`, `warden`, `staff`, and `admin` roles.
+- **User Administration**: Administrative portal APIs to search, filter, paginate, inspect, edit, activate/deactivate, and reassign user roles with built-in guardrails against self-demotion or self-lockout.
+- **Hostel Domain Schemas**: Comprehensive data models covering hostels, rooms, beds, allocations, maintenance complaints, fee structures, payment records, notices, and visitor logging.
+- **Resilient Security**: Strict Zod input validation schemas, dual brute-force rate limiters, Helmet HTTP security headers, and CORS origin whitelisting.
 
 ---
 
 ## Tech Stack
 
+### Frontend
+- **Framework**: React 19 (`react`, `react-dom`)
+- **Tooling & Bundler**: Vite 8
+- **Routing**: React Router v8 (`react-router`)
+- **Networking**: Axios (with custom CSRF interceptors and unified error formatting)
+- **Styling**: Vanilla CSS with modern tokens, glassmorphism, responsive grids, and Google Fonts typography
+
+### Backend
 - **Runtime**: Node.js (v18+, ES Modules)
-- **Framework**: Express.js
+- **Framework**: Express.js (v5)
 - **Database**: MongoDB with Mongoose ODM
 - **Schema Validation**: Zod (`zod`)
 - **Authentication & Security**:
-  - `jsonwebtoken`: Access tokens with unique identifier (`jti`), issuer, and audience claims
+  - `jsonwebtoken`: Access tokens with unique `jti`, issuer, and audience claims
   - `bcryptjs`: Password hashing with 12 salt rounds
-  - `helmet`: Security HTTP response headers
-  - `cors`: Whitelisted cross-origin resource sharing
-  - `express-rate-limit`: Brute-force protection & API request throttling
-  - `cookie-parser`: Secure HTTP-only cookie management
-- **Logging**: Morgan HTTP logger (development mode)
+  - `helmet`: HTTP security response headers
+  - `cors`: Strict origin whitelisting
+  - `express-rate-limit`: Endpoint-specific request throttling
+  - `cookie-parser`: Secure HTTP-only cookie parsing
+- **Logging**: Morgan HTTP request logger
 - **Testing & Quality Assurance**:
   - Node.js native test runner (`node --test`)
   - `supertest`: HTTP endpoint integration testing
-  - `mongodb-memory-server`: Isolated in-memory MongoDB test database
+  - `mongodb-memory-server`: Isolated in-memory MongoDB database for zero-dependency CI tests
 
 ---
 
@@ -77,64 +96,114 @@ The Smart Hostel system automates and streamlines hostel administration tasks in
 
 ```text
 smart-hostel/
-├── client/                               # Frontend application (React / Vite)
+├── client/                               # Frontend application (React 19 / Vite)
+│   ├── public/                           # Static assets, SVG icons, favicon
 │   ├── src/
-│   │   ├── components/
-│   │   ├── hooks/
+│   │   ├── api/                          # Networking layer
+│   │   │   ├── health.api.js             # Backend connectivity check
+│   │   │   └── httpClient.js             # Axios instance with CSRF interceptor
+│   │   ├── assets/                       # UI illustrations & vector assets
+│   │   ├── components/                   # Shared reusable UI elements
+│   │   │   ├── common/
+│   │   │   │   └── BackendStatus.jsx     # Live backend connection indicator
+│   │   │   └── ui/                       # UI primitives
+│   │   ├── features/                     # Feature-sliced domain modules
+│   │   │   ├── auth/                     # Authentication domain
+│   │   │   │   ├── api/auth.api.js       # Register, login, logout, me API calls
+│   │   │   │   ├── components/           # LoginForm, RegisterForm
+│   │   │   │   ├── pages/                # LoginPage, RegisterPage
+│   │   │   │   └── styles/auth.css       # Scoped auth module styles
+│   │   │   ├── allocations/              # Room allocations (scaffold)
+│   │   │   ├── hostels/                  # Hostel blocks (scaffold)
+│   │   │   ├── rooms/                    # Room inventory (scaffold)
+│   │   │   └── users/                    # User management (scaffold)
 │   │   ├── layouts/
-│   │   ├── pages/
-│   │   └── services/
+│   │   │   └── PublicLayout.jsx          # Public navbar, status pill & footer
+│   │   ├── pages/                        # General pages
+│   │   │   ├── HomePage.jsx              # Landing showcase & role quick access
+│   │   │   ├── ComingSoonPage.jsx        # Modular placeholder page
+│   │   │   └── NotFoundPage.jsx          # 404 handler
+│   │   ├── routes/
+│   │   │   └── AppRoutes.jsx             # React Router configuration
+│   │   ├── styles/
+│   │   │   └── global.css                # CSS variables, typography & reset
+│   │   ├── App.jsx                       # Application shell
+│   │   └── main.jsx                      # Client root mount
+│   ├── .env.example                      # Client environment template
+│   ├── vite.config.js                    # Vite bundler configuration
 │   └── package.json
 │
-├── server/                               # Backend API service
+├── server/                               # Backend REST API service (Node.js / Express)
 │   ├── scripts/
-│   │   └── bootstrap-admin.js            # Initial admin elevation tool
+│   │   └── bootstrap-admin.js            # Initial admin account elevation script
 │   ├── src/
 │   │   ├── config/
 │   │   │   ├── db.js                     # MongoDB connection handler
-│   │   │   └── env.js                    # Validated environment configurations
-│   │   ├── controllers/
-│   │   │   ├── auth.controller.js        # Register, login, logout, me handlers
-│   │   │   └── user.controller.js        # Admin user management handlers
-│   │   ├── middlewares/
-│   │   │   ├── auth.middleware.js        # JWT verification, revocation check & req.user
-│   │   │   ├── authRateLimit.middleware.js # Registration & login brute-force limiters
-│   │   │   ├── csrf.middleware.js        # CSRF check (X-Requested-With & origin verification)
+│   │   │   └── env.js                    # Validated environment configuration
+│   │   ├── controllers/                  # Route request handlers
+│   │   │   ├── auth.controller.js        # Register, login, logout, profile
+│   │   │   ├── user.controller.js        # Admin user management
+│   │   │   ├── allocation.controller.js  # Room/bed allocations
+│   │   │   ├── bed.controller.js         # Bed inventory
+│   │   │   ├── complaint.controller.js   # Maintenance complaints
+│   │   │   ├── fee.controller.js         # Fee structures
+│   │   │   ├── hostel.controller.js      # Hostel blocks
+│   │   │   ├── notice.controller.js      # Notice board
+│   │   │   ├── payment.controller.js     # Payment transactions
+│   │   │   ├── room.controller.js        # Room management
+│   │   │   ├── student.controller.js     # Student records
+│   │   │   └── visitor.controller.js     # Visitor logs
+│   │   ├── middlewares/                  # Express middleware pipeline
+│   │   │   ├── auth.middleware.js        # JWT verification & token revocation check
+│   │   │   ├── authRateLimit.middleware.js # Registration & login brute-force guards
+│   │   │   ├── csrf.middleware.js        # Custom header & origin validation
 │   │   │   ├── error.middleware.js       # Centralized error handler
-│   │   │   ├── notFound.middleware.js    # 404 route handler
+│   │   │   ├── notFound.middleware.js    # 404 handler
 │   │   │   ├── role.middleware.js        # Role-based authorization guard (RBAC)
 │   │   │   └── validate.middleware.js    # Zod schema validation middleware
-│   │   ├── models/
-│   │   │   ├── allocation.model.js       # Room/bed student allocations
-│   │   │   ├── bed.model.js              # Bed slots within rooms
-│   │   │   ├── complaint.model.js        # Maintenance & grievance tickets
-│   │   │   ├── fee.model.js              # Fee structures & dues
-│   │   │   ├── hostel.model.js           # Hostel blocks & properties
-│   │   │   ├── notice.model.js           # Announcements & official notices
-│   │   │   ├── payment.model.js          # Payment transaction records
-│   │   │   ├── revokedToken.model.js     # Token revocation blacklist with TTL expiry
-│   │   │   ├── room.model.js             # Room configurations & capacities
-│   │   │   ├── user.model.js             # User accounts & role definitions
-│   │   │   └── visitor.model.js          # Visitor log entries
-│   │   ├── routes/
-│   │   │   ├── auth.routes.js            # /api/v1/auth routing
-│   │   │   └── user.routes.js            # /api/v1/users admin routing
-│   │   ├── services/
-│   │   │   ├── auth.service.js           # Registration & authentication business logic
-│   │   │   ├── session.service.js        # Token blacklisting & session revocation logic
-│   │   │   └── user.service.js           # User querying, filtering & updating logic
-│   │   ├── utils/
-│   │   │   ├── ApiError.js               # Standardized application error class
-│   │   │   ├── asyncHandler.js           # Async route wrapper for exception handling
+│   │   ├── models/                       # Mongoose data schemas
+│   │   │   ├── allocation.model.js
+│   │   │   ├── bed.model.js
+│   │   │   ├── complaint.model.js
+│   │   │   ├── fee.model.js
+│   │   │   ├── hostel.model.js
+│   │   │   ├── notice.model.js
+│   │   │   ├── payment.model.js
+│   │   │   ├── revokedToken.model.js     # Revocation blacklist with TTL auto-cleanup
+│   │   │   ├── room.model.js
+│   │   │   ├── user.model.js
+│   │   │   └── visitor.model.js
+│   │   ├── routes/                       # Express router definitions
+│   │   │   ├── auth.routes.js            # /api/v1/auth
+│   │   │   ├── user.routes.js            # /api/v1/users
+│   │   │   ├── allocation.routes.js
+│   │   │   ├── bed.routes.js
+│   │   │   ├── complaint.routes.js
+│   │   │   ├── fee.routes.js
+│   │   │   ├── hostel.routes.js
+│   │   │   ├── notice.routes.js
+│   │   │   ├── payment.routes.js
+│   │   │   ├── room.routes.js
+│   │   │   ├── student.routes.js
+│   │   │   └── visitor.routes.js
+│   │   ├── services/                     # Business logic layer
+│   │   │   ├── auth.service.js
+│   │   │   ├── session.service.js        # Token blacklist & revocation handling
+│   │   │   ├── user.service.js           # Admin user search & mutations
+│   │   │   └── ...                       # Domain services (room, hostel, fee, etc.)
+│   │   ├── utils/                        # Utilities & helpers
+│   │   │   ├── ApiError.js               # Structured error class
+│   │   │   ├── asyncHandler.js           # Express async wrapper
 │   │   │   ├── response.js               # Standardized JSON response envelope
-│   │   │   └── token.js                  # JWT issuance, verification & SHA-256 hashing
-│   │   ├── validators/
-│   │   │   ├── auth.validator.js         # Register & login Zod schemas
-│   │   │   └── user.validator.js         # User list queries & update schemas
-│   │   ├── app.js                       # Express app setup & middleware pipeline
+│   │   │   └── token.js                  # JWT issuance, parsing & SHA-256 hashing
+│   │   ├── validators/                   # Zod validation schemas
+│   │   │   ├── auth.validator.js
+│   │   │   ├── user.validator.js
+│   │   │   └── ...
+│   │   ├── app.js                       # Express app assembly & global middleware
 │   │   └── server.js                    # HTTP listener bootstrap
 │   ├── tests/
-│   │   └── auth.integration.test.js     # End-to-end integration tests
+│   │   └── auth.integration.test.js     # End-to-end integration test suite
 │   ├── .env.example
 │   └── package.json
 └── README.md
@@ -144,7 +213,9 @@ smart-hostel/
 
 ## Environment Variables
 
-Create and configure a `.env` file in the `server/` directory:
+### Backend (`server/.env`)
+
+Configure the following variables in `server/.env`:
 
 ```env
 PORT=5001
@@ -157,13 +228,22 @@ NODE_ENV=development
 
 > **macOS Note**: Port `5001` is used by default because port `5000` is reserved by the macOS AirPlay Receiver (`AirTunes`).
 
+### Frontend (`client/.env`)
+
+Configure the following variables in `client/.env`:
+
+```env
+VITE_API_BASE_URL=http://localhost:5001/api/v1
+```
+
 ---
 
 ## Getting Started
 
 ### Prerequisites
 - **Node.js**: v18.0.0 or higher
-- **MongoDB**: Local MongoDB daemon or MongoDB Atlas URI
+- **npm**: v9.0.0 or higher
+- **MongoDB**: Local MongoDB instance (e.g. `brew services start mongodb-community`) or a remote MongoDB Atlas URI
 
 ### Installation
 
@@ -179,22 +259,55 @@ NODE_ENV=development
    npm install
    ```
 
-3. Ensure `.env` is populated with valid values in `server/.env`.
+3. Install frontend dependencies:
+   ```bash
+   cd ../client
+   npm install
+   ```
 
-### Running the Server
+4. Set up environment files:
+   ```bash
+   # In server/
+   cp .env.example .env
 
-- **Development Mode** (with automatic restart via nodemon):
-  ```bash
-  npm run dev
-  ```
-- **Production Mode**:
-  ```bash
-  npm start
-  ```
+   # In client/
+   cp .env.example .env
+   ```
+
+### Running the Backend
+
+From the `server` directory:
+
+```bash
+# Development Mode (auto-restart with nodemon)
+npm run dev
+
+# Production Mode
+npm start
+```
+
+Backend will be accessible at: `http://localhost:5001`
+
+### Running the Frontend
+
+In a separate terminal, from the `client` directory:
+
+```bash
+# Development Mode (Vite dev server)
+npm run dev
+
+# Production Build
+npm run build
+
+# Preview Production Build
+npm run preview
+```
+
+Frontend will be accessible at: `http://localhost:5173`
 
 ### Running Automated Tests
 
-The backend includes a comprehensive integration test suite running on Node's native test runner with `supertest` and `mongodb-memory-server` (no external MongoDB instance required):
+The backend includes a zero-dependency integration test suite running on Node's native test runner with `supertest` and `mongodb-memory-server` (an external MongoDB instance is not required):
 
 ```bash
 cd server
@@ -205,12 +318,43 @@ npm test
 
 To promote the first registered user to administrator in a development environment:
 
-1. Register an initial user (e.g. `admin@hostel.edu`) via the `/api/v1/auth/register` API.
+1. Register an initial user (e.g. `admin@hostel.edu`) via the `/register` frontend page or the `/api/v1/auth/register` API.
 2. Run the bootstrap script:
    ```bash
    cd server
    BOOTSTRAP_ADMIN_EMAIL="admin@hostel.edu" node scripts/bootstrap-admin.js
    ```
+
+---
+
+## Frontend Client Overview
+
+### Key Frontend Features
+
+1. **Feature-Sliced Architecture**: Codebase divided into domain slices (`features/auth`, `features/rooms`, `features/hostels`, etc.) promoting reusability and scalability.
+2. **Interactive Auth Forms**:
+   - Client-side validation with real-time feedback.
+   - Password confirmation checks and length constraints (minimum 8 characters, maximum 72 bytes).
+   - Dynamic error banner with specific field error mapping from backend Zod responses.
+   - Disabled states during submission to prevent duplicate actions.
+3. **Live Backend Connectivity Monitor**: A real-time `BackendStatus` badge prominently placed in the header that pings `/api/v1/health` and provides instant feedback on backend availability.
+4. **Responsive Modern UI**: Custom CSS tokens with smooth transitions, clean typography, responsive navigation, and accessible forms (`aria-invalid`, `aria-describedby`).
+
+### Application Routes
+
+| Path | View Component | Description |
+| :--- | :--- | :--- |
+| `/` | `HomePage` | Public landing page featuring platform statistics, features, and role-based access portals |
+| `/login` | `LoginPage` | User login portal for students and staff |
+| `/register` | `RegisterPage` | Student registration portal with live input validation |
+| `*` | `NotFoundPage` | Custom 404 page with return-to-home navigation |
+
+### CSRF & API Client Configuration
+
+All HTTP communication utilizes a centralized Axios instance configured in [`client/src/api/httpClient.js`](client/src/api/httpClient.js):
+- **Credentials Support**: `withCredentials: true` ensures authentication cookies (`accessToken`) are transmitted with every request.
+- **CSRF Token Interceptor**: Automatically attaches `X-Requested-With: XMLHttpRequest` on state-mutating HTTP methods (`POST`, `PUT`, `PATCH`, `DELETE`).
+- **Normalized Error Handling**: Converts network failures, timeouts, and API error bodies into a structured `ApiRequestError` format.
 
 ---
 
@@ -554,7 +698,7 @@ curl -X PATCH http://localhost:5001/api/v1/users/6acb89cdcca5f3892ad245b6/role \
 
 All mutating HTTP requests (`POST`, `PATCH`, `PUT`, `DELETE`) are processed by [`csrf.middleware.js`](server/src/middlewares/csrf.middleware.js):
 1. **Origin Verification**: Requests containing an `Origin` header that does not match `CLIENT_URL` are rejected.
-2. **Custom Header Enforcement**: Requests must supply `X-Requested-With: XMLHttpRequest`. Standard HTML forms or unauthorized cross-site scripts cannot submit custom headers without explicitly granted CORS preflight permissions.
+2. **Custom Header Enforcement**: Requests must supply `X-Requested-With: XMLHttpRequest`. Standard HTML forms or cross-site scripts cannot submit custom headers without CORS preflight permissions.
 
 ### Token Revocation & Session Management
 
@@ -588,7 +732,7 @@ Implemented in [`error.middleware.js`](server/src/middlewares/error.middleware.j
 ```mermaid
 sequenceDiagram
     autonumber
-    actor Client as Frontend Client
+    actor Client as Frontend Client (React)
     participant CSRF as CSRF Middleware
     participant Limiter as Rate Limiter
     participant Validator as Zod Validator
