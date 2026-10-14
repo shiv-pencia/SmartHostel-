@@ -10,6 +10,10 @@ import env from "./config/env.js";
 
 import authRoutes from "./routes/auth.routes.js";
 import userRoutes from "./routes/user.routes.js";
+import hostelRoutes from "./routes/hostel.routes.js";
+import roomRoutes from "./routes/room.routes.js";
+import bedRoutes from "./routes/bed.routes.js";
+import reportRoutes from "./routes/report.routes.js";
 
 import csrfProtection from "./middlewares/csrf.middleware.js";
 import notFoundMiddleware from "./middlewares/notFound.middleware.js";
@@ -18,10 +22,13 @@ import errorMiddleware from "./middlewares/error.middleware.js";
 const app = express();
 
 /*
- * Security
+ * Security headers
  */
 app.use(helmet());
 
+/*
+ * Browser CORS configuration
+ */
 app.use(
   cors({
     origin: env.clientUrl,
@@ -41,19 +48,20 @@ app.use(
 );
 
 /*
- * General API rate limiting
+ * General API rate limit
  */
-const apiLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  limit: 100,
-  standardHeaders: "draft-8",
-  legacyHeaders: false,
-});
-
-app.use("/api", apiLimiter);
+app.use(
+  "/api",
+  rateLimit({
+    windowMs: 15 * 60 * 1000,
+    limit: 100,
+    standardHeaders: "draft-8",
+    legacyHeaders: false,
+  })
+);
 
 /*
- * Request parsing
+ * Request body parsing
  */
 app.use(express.json({ limit: "10kb" }));
 
@@ -67,14 +75,14 @@ app.use(
 app.use(cookieParser());
 
 /*
- * Development logging
+ * Development request logging
  */
 if (env.nodeEnv === "development") {
   app.use(morgan("dev"));
 }
 
 /*
- * CSRF protection for API requests
+ * CSRF protection for modifying requests
  */
 app.use("/api/v1", csrfProtection);
 
@@ -82,20 +90,24 @@ app.use("/api/v1", csrfProtection);
  * Health check
  */
 app.get("/api/v1/health", (req, res) => {
-  res.status(200).json({
+  return res.status(200).json({
     success: true,
     message: "Smart Hostel API is running",
   });
 });
 
 /*
- * Application routes
+ * API routes
  */
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/users", userRoutes);
+app.use("/api/v1/hostels", hostelRoutes);
+app.use("/api/v1/rooms", roomRoutes);
+app.use("/api/v1/beds", bedRoutes);
+app.use("/api/v1/reports", reportRoutes);
 
 /*
- * Error handlers
+ * Error middleware
  */
 app.use(notFoundMiddleware);
 app.use(errorMiddleware);

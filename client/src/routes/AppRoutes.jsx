@@ -18,6 +18,10 @@ import LoginPage from "../features/auth/pages/LoginPage.jsx";
 import RegisterPage from "../features/auth/pages/RegisterPage.jsx";
 
 import AdminUsersPage from "../features/users/pages/AdminUsersPage.jsx";
+import AdminHostelsPage from "../features/hostels/pages/AdminHostelsPage.jsx";
+import AdminRoomsPage from "../features/rooms/pages/AdminRoomsPage.jsx";
+
+import AdminInventoryReportPage from "../features/reports/pages/AdminInventoryReportPage.jsx";
 
 import ProtectedRoute from "./ProtectedRoute.jsx";
 import RoleRoute from "./RoleRoute.jsx";
@@ -40,7 +44,7 @@ function DashboardRedirect() {
 function AppRoutes() {
     return (
         <Routes>
-            {/* Public website */}
+            {/* Public pages */}
             <Route element={<PublicLayout />}>
                 <Route
                     index
@@ -60,7 +64,7 @@ function AppRoutes() {
                 </Route>
             </Route>
 
-            {/* Protected application */}
+            {/* Authenticated application */}
             <Route element={<ProtectedRoute />}>
                 <Route
                     path="dashboard"
@@ -82,7 +86,6 @@ function AppRoutes() {
                             element={<RoleDashboardPage />}
                         />
 
-                        {/* REAL USER MANAGEMENT */}
                         <Route
                             path="users"
                             element={<AdminUsersPage />}
@@ -90,29 +93,18 @@ function AppRoutes() {
 
                         <Route
                             path="hostels"
-                            element={
-                                <ModulePlaceholderPage
-                                    title="Hostel Management"
-                                />
-                            }
+                            element={<AdminHostelsPage />}
                         />
 
                         <Route
                             path="rooms"
-                            element={
-                                <ModulePlaceholderPage
-                                    title="Room & Bed Management"
-                                />
-                            }
+                            element={<AdminRoomsPage />}
                         />
 
+                        {/* Inventory reporting */}
                         <Route
                             path="reports"
-                            element={
-                                <ModulePlaceholderPage
-                                    title="Reports & Analytics"
-                                />
-                            }
+                            element={<AdminInventoryReportPage />}
                         />
 
                         <Route
@@ -246,7 +238,7 @@ function AppRoutes() {
                 </Route>
             </Route>
 
-            {/* Unknown frontend routes */}
+            {/* Unknown routes */}
             <Route
                 path="*"
                 element={<NotFoundPage />}

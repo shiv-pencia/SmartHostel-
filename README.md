@@ -39,6 +39,26 @@ A modern, full-stack Hostel Management System featuring a **React 19** frontend 
     - [9. Update Basic User Details](#9-update-basic-user-details)
     - [10. Activate / Deactivate User Status](#10-activate--deactivate-user-status)
     - [11. Update User Role](#11-update-user-role)
+  - [Hostel Management Endpoints](#hostel-management-endpoints)
+    - [12. Create Hostel](#12-create-hostel)
+    - [13. List All Hostels](#13-list-all-hostels)
+    - [14. Get Hostel by ID](#14-get-hostel-by-id)
+    - [15. Update Hostel Details](#15-update-hostel-details)
+    - [16. Update Hostel Operational Status](#16-update-hostel-operational-status)
+  - [Room Management Endpoints](#room-management-endpoints)
+    - [17. Create Room](#17-create-room)
+    - [18. List Rooms](#18-list-rooms)
+    - [19. Get Room by ID](#19-get-room-by-id)
+    - [20. Update Room Details](#20-update-room-details)
+    - [21. Update Room Operational Status](#21-update-room-operational-status)
+  - [Bed Inventory Endpoints](#bed-inventory-endpoints)
+    - [22. Create Bed in Room](#22-create-bed-in-room)
+    - [23. List Beds in Room](#23-list-beds-in-room)
+    - [24. Get Bed by ID](#24-get-bed-by-id)
+    - [25. Update Bed Label](#25-update-bed-label)
+    - [26. Update Bed Operational Status](#26-update-bed-operational-status)
+  - [Inventory & Integrity Reporting Endpoints](#inventory--integrity-reporting-endpoints)
+    - [27. System Inventory & Diagnostics Report](#27-system-inventory--diagnostics-report)
 - [Security & Validation Architecture](#security--validation-architecture)
   - [CSRF Protection & Custom Header Requirement](#csrf-protection--custom-header-requirement)
   - [Token Revocation & Session Management](#token-revocation--session-management)
@@ -128,6 +148,21 @@ smart-hostel/
 │   │   │   │   ├── components/           # LoginForm, RegisterForm
 │   │   │   │   ├── pages/                # LoginPage, RegisterPage
 │   │   │   │   └── styles/auth.css       # Scoped auth module styles
+│   │   │   ├── hostels/                  # Hostel block management domain
+│   │   │   │   ├── api/hostels.api.js    # Hostel CRUD & active warden fetch APIs
+│   │   │   │   ├── components/           # HostelTable, HostelForm
+│   │   │   │   ├── pages/                # AdminHostelsPage
+│   │   │   │   └── styles/hostels.css    # Hostel directory styling
+│   │   │   ├── rooms/                    # Room and bed management domain
+│   │   │   │   ├── api/rooms.api.js      # Room CRUD & status mutation APIs
+│   │   │   │   ├── api/beds.api.js       # Bed provisioning & status APIs
+│   │   │   │   ├── components/           # RoomTable, RoomForm, BedManager
+│   │   │   │   ├── pages/                # AdminRoomsPage
+│   │   │   │   └── styles/rooms.css      # Room inventory & bed manager styling
+│   │   │   ├── reports/                  # System reports & analytics domain
+│   │   │   │   ├── api/inventory.api.js  # Inventory & diagnostics fetch API
+│   │   │   │   ├── pages/                # AdminInventoryReportPage
+│   │   │   │   └── styles/reports.css    # Analytics metrics & distribution styling
 │   │   │   └── users/                    # Admin user management domain
 │   │   │       ├── api/users.api.js      # User query, role & status mutation APIs
 │   │   │       ├── components/           # UserTable, UserDetailsPanel
@@ -177,16 +212,17 @@ smart-hostel/
 │   │   ├── controllers/                  # Route request handlers
 │   │   │   ├── auth.controller.js        # Register, login, logout, profile
 │   │   │   ├── user.controller.js        # Admin user management
-│   │   │   ├── allocation.controller.js  # Room/bed allocations
-│   │   │   ├── bed.controller.js         # Bed inventory
-│   │   │   ├── complaint.controller.js   # Maintenance complaints
-│   │   │   ├── fee.controller.js         # Fee structures
-│   │   │   ├── hostel.controller.js      # Hostel blocks
-│   │   │   ├── notice.controller.js      # Notice board
-│   │   │   ├── payment.controller.js     # Payment transactions
-│   │   │   ├── room.controller.js        # Room management
-│   │   │   ├── student.controller.js     # Student records
-│   │   │   └── visitor.controller.js     # Visitor logs
+│   │   │   ├── hostel.controller.js      # Hostel CRUD & status
+│   │   │   ├── room.controller.js        # Room CRUD & capacity guard
+│   │   │   ├── bed.controller.js         # Bed provisioning & status
+│   │   │   ├── inventoryReport.controller.js # Inventory metrics & integrity diagnostics
+│   │   │   ├── allocation.controller.js  # Room/bed allocations (scaffold)
+│   │   │   ├── complaint.controller.js   # Maintenance complaints (scaffold)
+│   │   │   ├── fee.controller.js         # Fee structures (scaffold)
+│   │   │   ├── notice.controller.js      # Notice board (scaffold)
+│   │   │   ├── payment.controller.js     # Payment transactions (scaffold)
+│   │   │   ├── student.controller.js     # Student records (scaffold)
+│   │   │   └── visitor.controller.js     # Visitor logs (scaffold)
 │   │   ├── middlewares/                  # Express middleware pipeline
 │   │   │   ├── auth.middleware.js        # JWT verification & token revocation check
 │   │   │   ├── authRateLimit.middleware.js # Registration & login brute-force guards
@@ -194,37 +230,43 @@ smart-hostel/
 │   │   │   ├── error.middleware.js       # Centralized error handler
 │   │   │   ├── notFound.middleware.js    # 404 handler
 │   │   │   ├── role.middleware.js        # Role-based authorization guard (RBAC)
-│   │   │   └── validate.middleware.js    # Zod schema validation middleware
+│   │   │   ├── validate.middleware.js    # Zod schema validation middleware
+│   │   │   └── validateObjectId.middleware.js # MongoDB ObjectId parameter validation
 │   │   ├── models/                       # Mongoose data schemas
+│   │   │   ├── user.model.js
+│   │   │   ├── hostel.model.js           # Hostels with unique code and warden ref
+│   │   │   ├── room.model.js             # Rooms with capacity & provisioned bedCount
+│   │   │   ├── bed.model.js              # Beds with unique room-bed index & status
+│   │   │   ├── revokedToken.model.js     # Revocation blacklist with TTL auto-cleanup
 │   │   │   ├── allocation.model.js
-│   │   │   ├── bed.model.js
 │   │   │   ├── complaint.model.js
 │   │   │   ├── fee.model.js
-│   │   │   ├── hostel.model.js
 │   │   │   ├── notice.model.js
 │   │   │   ├── payment.model.js
-│   │   │   ├── revokedToken.model.js     # Revocation blacklist with TTL auto-cleanup
-│   │   │   ├── room.model.js
-│   │   │   ├── user.model.js
 │   │   │   └── visitor.model.js
 │   │   ├── routes/                       # Express router definitions
 │   │   │   ├── auth.routes.js            # /api/v1/auth
 │   │   │   ├── user.routes.js            # /api/v1/users
+│   │   │   ├── hostel.routes.js          # /api/v1/hostels
+│   │   │   ├── room.routes.js            # /api/v1/rooms
+│   │   │   ├── bed.routes.js             # /api/v1/beds
+│   │   │   ├── report.routes.js          # /api/v1/reports
 │   │   │   ├── allocation.routes.js
-│   │   │   ├── bed.routes.js
 │   │   │   ├── complaint.routes.js
 │   │   │   ├── fee.routes.js
-│   │   │   ├── hostel.routes.js
 │   │   │   ├── notice.routes.js
 │   │   │   ├── payment.routes.js
-│   │   │   ├── room.routes.js
 │   │   │   ├── student.routes.js
 │   │   │   └── visitor.routes.js
 │   │   ├── services/                     # Business logic layer
 │   │   │   ├── auth.service.js
 │   │   │   ├── session.service.js        # Token blacklist & revocation handling
 │   │   │   ├── user.service.js           # Admin user search & mutations
-│   │   │   └── ...                       # Domain services (room, hostel, fee, etc.)
+│   │   │   ├── hostel.service.js         # Hostel creation, updates, and warden lookup
+│   │   │   ├── room.service.js           # Room capacity rules & compound constraints
+│   │   │   ├── bed.service.js            # Atomic bed counter & transaction rollback
+│   │   │   ├── inventoryReport.service.js# System inventory aggregation & diagnostics
+│   │   │   └── ...                       # Scaffold services
 │   │   ├── utils/                        # Utilities & helpers
 │   │   │   ├── ApiError.js               # Structured error class
 │   │   │   ├── asyncHandler.js           # Express async wrapper
@@ -233,11 +275,17 @@ smart-hostel/
 │   │   ├── validators/                   # Zod validation schemas
 │   │   │   ├── auth.validator.js
 │   │   │   ├── user.validator.js
+│   │   │   ├── hostel.validator.js       # Hostel creation & update schemas
+│   │   │   ├── room.validator.js         # Room creation & capacity schemas
+│   │   │   ├── bed.validator.js          # Bed provisioning & status schemas
 │   │   │   └── ...
 │   │   ├── app.js                       # Express app assembly & global middleware
 │   │   └── server.js                    # HTTP listener bootstrap
 │   ├── tests/
-│   │   └── auth.integration.test.js     # End-to-end integration test suite
+│   │   ├── auth.integration.test.js     # Auth, CSRF & RBAC integration tests
+│   │   ├── hostel-models.integration.test.js # Schema constraints & unique indexes
+│   │   ├── room-bed.integration.test.js # Room capacity rules & bed transactions
+│   │   └── inventory-report.integration.test.js # Inventory aggregation & diagnostics
 │   ├── .env.example
 │   └── package.json
 └── README.md
@@ -342,7 +390,11 @@ Frontend will be accessible at: `http://localhost:5173`
 ### Running Automated Tests
 
 #### Backend Integration Tests
-The backend includes a zero-dependency integration test suite running on Node's native test runner with `supertest` and `mongodb-memory-server` (an external MongoDB instance is not required):
+The backend includes a zero-dependency automated test suite (**38 tests across 4 test suites**) running on Node's native test runner with `supertest` and `mongodb-memory-server` (an external MongoDB instance is not required):
+- **`auth.integration.test.js`**: Authentication lifecycle, CSRF header requirements, origin validation, rate limiting, and RBAC guards.
+- **`hostel-models.integration.test.js`**: Database constraints, unique compound indexes (`[hostel, roomNumber]`, `[room, bedNumber]`), and duplicate code rejection.
+- **`room-bed.integration.test.js`**: Room capacity rules, atomic bed counter increments, duplicate bed rollback, capacity reduction guards, and bed maintenance status transitions.
+- **`inventory-report.integration.test.js`**: Inventory calculation accuracy, unprovisioned vs provisionable slot segregation, bed status totals, and orphaned document detection.
 
 ```bash
 cd server
@@ -391,11 +443,24 @@ To promote the first registered user to administrator in a development environme
    - Interactive data table with query search (name/email), role filter, and active/inactive status filter.
    - Server-side paginated navigation with total record count and page indicators.
    - Slide-out details drawer (`UserDetailsPanel`) allowing direct status toggles and role modifications with server safety confirmations.
-5. **Interactive Auth Forms**:
+5. **Hostel Block Management (`AdminHostelsPage`)**:
+   - Create new hostel blocks with unique uppercase code, name, type (`boys`, `girls`, `coed`), total floor counts, description, and assigned active warden.
+   - Dynamic warden assignment dropdown querying active users with `warden` role via `GET /api/v1/users`.
+   - Operational status management (`active`, `inactive`, `under_maintenance`) with responsive table rows and badge indicators.
+6. **Room & Bed Management (`AdminRoomsPage`)**:
+   - Room inventory directory filterable by parent hostel, operational status, floor, and room type (`single`, `double`, `triple`, `four_sharing`).
+   - Room creation and capacity management with safety checks against capacity reduction below provisioned beds.
+   - Integrated **Bed Manager Drawer (`BedManager`)**: Real-time bed provisioning, custom bed numbering, occupancy tracking, and maintenance status controls.
+7. **Inventory & Diagnostics Analytics (`AdminInventoryReportPage`)**:
+   - System-wide metric cards displaying total hostels, rooms, student capacity, provisioned beds, and unprovisioned capacity slots.
+   - Bed status breakdown (available, occupied, maintenance) and room-type distribution metrics.
+   - Hostel-by-hostel breakdown tables displaying capacity and bed occupancy stats.
+   - Automated database integrity diagnostics highlighting orphaned records or bed counter discrepancies.
+8. **Interactive Auth Forms**:
    - Real-time client-side validation, password length bounds, and confirmation matching.
    - Accessible form controls (`aria-invalid`, `role="alert"`).
    - Submitting state feedback preventing duplicate requests.
-6. **Live Backend Connectivity Monitor**:
+9. **Live Backend Connectivity Monitor**:
    - Real-time `BackendStatus` badge querying `/api/v1/health` with instant status indicators (Operational, Offline, Checking).
 
 ### Application Routes
@@ -408,9 +473,9 @@ To promote the first registered user to administrator in a development environme
 | `/dashboard` | `DashboardRedirect` | Authenticated | Automatically redirects authenticated users to their role-specific home route |
 | `/admin` | `RoleDashboardPage` | `admin` | Administrator overview with system statistics & management shortcuts |
 | `/admin/users` | `AdminUsersPage` | `admin` | Full user management portal with search, filtering, status toggling, and role assignment |
-| `/admin/hostels` | `ModulePlaceholderPage` | `admin` | Hostel block management module |
-| `/admin/rooms` | `ModulePlaceholderPage` | `admin` | Room & bed inventory module |
-| `/admin/reports` | `ModulePlaceholderPage` | `admin` | Reports & system analytics module |
+| `/admin/hostels` | `AdminHostelsPage` | `admin` | Hostel block directory, warden assignment, block creation, and status controls |
+| `/admin/rooms` | `AdminRoomsPage` | `admin` | Room inventory directory with capacity guards and integrated `BedManager` drawer |
+| `/admin/reports` | `AdminInventoryReportPage` | `admin` | System-wide inventory analytics, capacity distribution, and database integrity diagnostics |
 | `/student` | `RoleDashboardPage` | `student` | Student overview with room info, complaint status, and quick links |
 | `/student/allocation` | `ModulePlaceholderPage` | `student` | Room and bed allocation details module |
 | `/student/complaints` | `ModulePlaceholderPage` | `student` | Maintenance complaint submission & tracking module |
@@ -763,6 +828,306 @@ curl -X PATCH http://localhost:5001/api/v1/users/6acb89cdcca5f3892ad245b6/role \
   -H "X-Requested-With: XMLHttpRequest" \
   --cookie "accessToken=ADMIN_TOKEN..." \
   -d '{ "role": "warden" }'
+```
+
+---
+
+### Hostel Management Endpoints
+
+All mutating hostel operations require `role: "admin"`. Read operations allow `role: "admin"` and `role: "warden"`.
+
+#### 12. Create Hostel
+
+Creates a new hostel block with unique block code.
+
+- **Method**: `POST`
+- **Route**: `/api/v1/hostels`
+- **Authentication**: Required (`admin`)
+- **Required Headers**: `Content-Type: application/json`, `X-Requested-With: XMLHttpRequest`
+
+**Request Body Schema**:
+| Field | Type | Required | Constraints |
+| :--- | :--- | :--- | :--- |
+| `code` | String | Yes | 2 to 10 alphanumeric characters, normalized to uppercase |
+| `name` | String | Yes | 2 to 100 characters |
+| `type` | String | Yes | `boys`, `girls`, or `coed` |
+| `totalFloors` | Integer | Yes | Minimum 1 |
+| `warden` | ObjectId | No | Must reference an existing user with `role: "warden"` |
+| `description`| String | No | Maximum 500 characters |
+
+**Sample Request**:
+```bash
+curl -X POST http://localhost:5001/api/v1/hostels \
+  -H "Content-Type: application/json" \
+  -H "X-Requested-With: XMLHttpRequest" \
+  --cookie "accessToken=ADMIN_TOKEN..." \
+  -d '{
+    "code": "BH-1",
+    "name": "Boys Hostel Block 1",
+    "type": "boys",
+    "totalFloors": 4,
+    "description": "Undergraduate residence block"
+  }'
+```
+
+**Response (`201 Created`)**:
+```json
+{
+  "success": true,
+  "message": "Hostel created successfully",
+  "data": {
+    "hostel": {
+      "id": "6ad0123456789abcdef0001",
+      "code": "BH-1",
+      "name": "Boys Hostel Block 1",
+      "type": "boys",
+      "totalFloors": 4,
+      "status": "active",
+      "warden": null,
+      "description": "Undergraduate residence block"
+    }
+  }
+}
+```
+
+---
+
+#### 13. List All Hostels
+
+Fetches all hostel blocks with optional filtering.
+
+- **Method**: `GET`
+- **Route**: `/api/v1/hostels`
+- **Authentication**: Required (`admin`, `warden`)
+- **Query Parameters**:
+  - `status`: `active`, `inactive`, `under_maintenance`
+  - `type`: `boys`, `girls`, `coed`
+  - `search`: Search query matching code or name
+
+---
+
+#### 14. Get Hostel by ID
+
+Retrieves details for a single hostel block.
+
+- **Method**: `GET`
+- **Route**: `/api/v1/hostels/:hostelId`
+- **Authentication**: Required (`admin`, `warden`)
+
+---
+
+#### 15. Update Hostel Details
+
+Updates name, type, floor counts, warden assignment, or description.
+
+- **Method**: `PATCH`
+- **Route**: `/api/v1/hostels/:hostelId`
+- **Authentication**: Required (`admin`)
+- **Required Headers**: `Content-Type: application/json`, `X-Requested-With: XMLHttpRequest`
+
+---
+
+#### 16. Update Hostel Operational Status
+
+Changes the operating status of a hostel block (`active`, `inactive`, `under_maintenance`).
+
+- **Method**: `PATCH`
+- **Route**: `/api/v1/hostels/:hostelId/status`
+- **Authentication**: Required (`admin`)
+- **Required Headers**: `Content-Type: application/json`, `X-Requested-With: XMLHttpRequest`
+
+```bash
+curl -X PATCH http://localhost:5001/api/v1/hostels/6ad0123456789abcdef0001/status \
+  -H "Content-Type: application/json" \
+  -H "X-Requested-With: XMLHttpRequest" \
+  --cookie "accessToken=ADMIN_TOKEN..." \
+  -d '{ "status": "under_maintenance" }'
+```
+
+---
+
+### Room Management Endpoints
+
+#### 17. Create Room
+
+Creates a room record under an active parent hostel.
+
+- **Method**: `POST`
+- **Route**: `/api/v1/rooms`
+- **Authentication**: Required (`admin`)
+- **Required Headers**: `Content-Type: application/json`, `X-Requested-With: XMLHttpRequest`
+
+**Request Body Schema**:
+| Field | Type | Required | Constraints |
+| :--- | :--- | :--- | :--- |
+| `hostel` | ObjectId | Yes | Must reference an active hostel |
+| `roomNumber` | String | Yes | Unique per hostel (compound index `[hostel, roomNumber]`) |
+| `floor` | Integer | Yes | 0 to parent hostel's `totalFloors` |
+| `roomType` | String | Yes | `single`, `double`, `triple`, `four_sharing` |
+| `capacity` | Integer | Yes | 1 to 8 students |
+
+**Sample Request**:
+```bash
+curl -X POST http://localhost:5001/api/v1/rooms \
+  -H "Content-Type: application/json" \
+  -H "X-Requested-With: XMLHttpRequest" \
+  --cookie "accessToken=ADMIN_TOKEN..." \
+  -d '{
+    "hostel": "6ad0123456789abcdef0001",
+    "roomNumber": "101",
+    "floor": 1,
+    "roomType": "double",
+    "capacity": 2
+  }'
+```
+
+---
+
+#### 18. List Rooms
+
+Queries rooms filtered by hostel, floor, room type, or status.
+
+- **Method**: `GET`
+- **Route**: `/api/v1/rooms`
+- **Authentication**: Required (`admin`, `warden`)
+- **Query Parameters**: `hostel` (ObjectId), `status`, `floor`, `roomType`
+
+---
+
+#### 19. Get Room by ID
+
+- **Method**: `GET`
+- **Route**: `/api/v1/rooms/:roomId`
+- **Authentication**: Required (`admin`, `warden`)
+
+---
+
+#### 20. Update Room Details
+
+Modifies room parameters. Includes an integrity guard that prevents capacity from being reduced below the current `bedCount`.
+
+- **Method**: `PATCH`
+- **Route**: `/api/v1/rooms/:roomId`
+- **Authentication**: Required (`admin`)
+- **Required Headers**: `Content-Type: application/json`, `X-Requested-With: XMLHttpRequest`
+
+---
+
+#### 21. Update Room Operational Status
+
+- **Method**: `PATCH`
+- **Route**: `/api/v1/rooms/:roomId/status`
+- **Authentication**: Required (`admin`)
+- **Required Headers**: `Content-Type: application/json`, `X-Requested-With: XMLHttpRequest`
+- **Payload**: `{ "status": "active" | "inactive" | "under_maintenance" }`
+
+---
+
+### Bed Inventory Endpoints
+
+#### 22. Create Bed in Room
+
+Provisions a new physical bed inside a room using an atomic transaction.
+
+- **Method**: `POST`
+- **Route**: `/api/v1/rooms/:roomId/beds`
+- **Authentication**: Required (`admin`)
+- **Required Headers**: `Content-Type: application/json`, `X-Requested-With: XMLHttpRequest`
+- **Business Rule**: Increments room `bedCount` only if `bedCount < capacity`. If duplicate bed labels or limits are violated, the counter automatically rolls back (`409 Conflict`).
+
+**Sample Request**:
+```bash
+curl -X POST http://localhost:5001/api/v1/rooms/6ad0222256789abcdef0002/beds \
+  -H "Content-Type: application/json" \
+  -H "X-Requested-With: XMLHttpRequest" \
+  --cookie "accessToken=ADMIN_TOKEN..." \
+  -d '{ "bedNumber": "B1" }'
+```
+
+---
+
+#### 23. List Beds in Room
+
+- **Method**: `GET`
+- **Route**: `/api/v1/rooms/:roomId/beds`
+- **Authentication**: Required (`admin`, `warden`)
+
+---
+
+#### 24. Get Bed by ID
+
+- **Method**: `GET`
+- **Route**: `/api/v1/beds/:bedId`
+- **Authentication**: Required (`admin`, `warden`)
+
+---
+
+#### 25. Update Bed Label
+
+- **Method**: `PATCH`
+- **Route**: `/api/v1/beds/:bedId`
+- **Authentication**: Required (`admin`)
+- **Required Headers**: `Content-Type: application/json`, `X-Requested-With: XMLHttpRequest`
+- **Payload**: `{ "bedNumber": "B1-A" }`
+
+---
+
+#### 26. Update Bed Operational Status
+
+- **Method**: `PATCH`
+- **Route**: `/api/v1/beds/:bedId/status`
+- **Authentication**: Required (`admin`)
+- **Required Headers**: `Content-Type: application/json`, `X-Requested-With: XMLHttpRequest`
+- **Payload**: `{ "status": "available" | "occupied" | "under_maintenance" }`
+
+---
+
+### Inventory & Integrity Reporting Endpoints
+
+#### 27. System Inventory & Diagnostics Report
+
+Calculates system-wide bed inventory, unprovisioned capacity slots, occupancy distribution, and database consistency diagnostics.
+
+- **Method**: `GET`
+- **Route**: `/api/v1/reports/inventory`
+- **Authentication**: Required (`admin`)
+
+**Sample Response (`200 OK`)**:
+```json
+{
+  "success": true,
+  "message": "Inventory report generated successfully",
+  "data": {
+    "summary": {
+      "totalHostels": 3,
+      "totalRooms": 48,
+      "totalCapacity": 120,
+      "provisionedBeds": 110,
+      "unprovisionedSlots": 10,
+      "availableBeds": 75,
+      "occupiedBeds": 30,
+      "underMaintenanceBeds": 5
+    },
+    "hostels": [
+      {
+        "hostelId": "6ad0123456789abcdef0001",
+        "code": "BH-1",
+        "name": "Boys Hostel Block 1",
+        "totalRooms": 20,
+        "totalCapacity": 50,
+        "provisionedBeds": 45,
+        "availableBeds": 30,
+        "occupiedBeds": 12,
+        "underMaintenanceBeds": 3
+      }
+    ],
+    "diagnostics": {
+      "hasIntegrityIssues": false,
+      "inconsistentRooms": [],
+      "orphanedBeds": []
+    }
+  }
+}
 ```
 
 ---

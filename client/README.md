@@ -24,6 +24,21 @@ The frontend web application for the **Smart Hostel Management System**, built w
   - Filterable by user role (`student`, `warden`, `staff`, `admin`) and account status (`active`, `inactive`).
   - Server-side paginated table with total record count and page indicators.
   - Slide-out details drawer (`UserDetailsPanel`) allowing direct status toggles and role modifications with server safety confirmations.
+- **Hostel Block Management Portal (`AdminHostelsPage`)**:
+  - Add new hostel blocks with unique code (`BH-1`, `GH-1`), name, block type (`boys`, `girls`, `coed`), and total floors.
+  - Live warden assignment selector pulling active users with `role: "warden"` directly from User Management.
+  - Operational status management (`active`, `inactive`, `under_maintenance`).
+- **Room & Bed Inventory Management (`AdminRoomsPage`)**:
+  - Filter rooms by parent hostel block, operational status, floor, and room sharing type.
+  - Create rooms with automatic capacity bounds (1 to 8 students) and duplicate-room rejection.
+  - Integrated **Bed Manager Drawer (`BedManager`)**:
+    - Add individual physical beds (`B1`, `B2`, etc.) with atomic capacity checks.
+    - Inline edit bed numbers.
+    - Track bed status (`available`, `occupied`, `under_maintenance`) with real-time feedback.
+- **System Inventory & Diagnostics Analytics (`AdminInventoryReportPage`)**:
+  - Summary metric cards: Total hostels, rooms, total capacity, provisioned beds, unprovisioned slots, and occupancy counts.
+  - Visual distribution and occupancy rates by hostel block.
+  - Automated database integrity diagnostics highlighting orphaned records or bed counter mismatches.
 - **Student Authentication & Onboarding**:
   - **Login Page (`/login`)**: Client-side validation, live error highlighting, auto-clearing error states on input, and role-based redirect.
   - **Student Registration Page (`/register`)**: Strict validation rules matching backend security constraints (email format, 8+ char password bounds, confirm-password match, optional phone format validation).
@@ -78,15 +93,30 @@ client/
 │   │   └── AuthProvider.jsx      # Session provider (cookie-driven)
 │   ├── features/                 # Modular domain feature slices
 │   │   ├── auth/                 # Authentication & authorization feature
-│   │   │   ├── api/              # Auth API calls (register, login, logout, me)
+│   │   │   ├── api/auth.api.js   # Auth API calls (register, login, logout, me)
 │   │   │   ├── components/       # LoginForm, RegisterForm
 │   │   │   ├── pages/            # LoginPage, RegisterPage
-│   │   │   └── styles/           # auth.css modular styling
+│   │   │   └── styles/auth.css   # Scoped auth module styles
+│   │   ├── hostels/              # Hostel block management feature
+│   │   │   ├── api/hostels.api.js# Hostel CRUD & active warden fetch APIs
+│   │   │   ├── components/       # HostelTable, HostelForm
+│   │   │   ├── pages/            # AdminHostelsPage
+│   │   │   └── styles/hostels.css# Hostel directory styling
+│   │   ├── rooms/                # Room & bed management feature
+│   │   │   ├── api/rooms.api.js  # Room CRUD & status APIs
+│   │   │   ├── api/beds.api.js   # Bed provisioning & status APIs
+│   │   │   ├── components/       # RoomTable, RoomForm, BedManager
+│   │   │   ├── pages/            # AdminRoomsPage
+│   │   │   └── styles/rooms.css  # Room inventory & bed drawer styles
+│   │   ├── reports/              # Reports & analytics feature
+│   │   │   ├── api/inventory.api.js # Inventory & diagnostics API
+│   │   │   ├── pages/            # AdminInventoryReportPage
+│   │   │   └── styles/reports.css# Analytics cards & table styles
 │   │   └── users/                # Admin user management feature
-│   │       ├── api/              # users.api.js (queries, mutations)
-│   │       ├── components/       # UserTable.jsx, UserDetailsPanel.jsx
-│   │       ├── pages/            # AdminUsersPage.jsx
-│   │       └── styles/           # users.css modular styling
+│   │       ├── api/users.api.js  # User query, role & status mutation APIs
+│   │       ├── components/       # UserTable, UserDetailsPanel
+│   │       ├── pages/            # AdminUsersPage
+│   │       └── styles/users.css  # User management styling
 │   ├── hooks/                    # Custom React hooks
 │   │   └── useAuth.js            # Hook to consume AuthContext
 │   ├── layouts/                  # Layout wrappers
@@ -194,9 +224,9 @@ http://localhost:5173
 | `/dashboard` | `DashboardRedirect` | Authenticated | Automatically redirects authenticated users to their role-specific home route |
 | `/admin` | `RoleDashboardPage` | `admin` | Administrator overview with system statistics & management shortcuts |
 | `/admin/users` | `AdminUsersPage` | `admin` | Full user management portal with search, filtering, status toggling, and role assignment |
-| `/admin/hostels` | `ModulePlaceholderPage` | `admin` | Hostel block management module |
-| `/admin/rooms` | `ModulePlaceholderPage` | `admin` | Room & bed inventory module |
-| `/admin/reports` | `ModulePlaceholderPage` | `admin` | Reports & system analytics module |
+| `/admin/hostels` | `AdminHostelsPage` | `admin` | Hostel block directory, warden assignment, block creation, and status controls |
+| `/admin/rooms` | `AdminRoomsPage` | `admin` | Room inventory directory with capacity guards and integrated `BedManager` drawer |
+| `/admin/reports` | `AdminInventoryReportPage` | `admin` | System-wide inventory analytics, capacity distribution, and database integrity diagnostics |
 | `/student` | `RoleDashboardPage` | `student` | Student overview with room info, complaint status, and quick links |
 | `/student/allocation` | `ModulePlaceholderPage` | `student` | Room and bed allocation details module |
 | `/student/complaints` | `ModulePlaceholderPage` | `student` | Maintenance complaint submission & tracking module |
