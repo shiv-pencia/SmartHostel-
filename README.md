@@ -176,9 +176,6 @@ smart-hostel/
 │   │   ├── pages/                        # General pages
 │   │   │   ├── HomePage.jsx              # Landing showcase & role quick access
 │   │   │   ├── RoleDashboardPage.jsx     # Personalized role-based dashboard view
-│   │   │   ├── DashboardPage.jsx         # General dashboard landing
-│   │   │   ├── ModulePlaceholderPage.jsx # Modular placeholder for upcoming features
-│   │   │   ├── ComingSoonPage.jsx        # Modular placeholder page
 │   │   │   └── NotFoundPage.jsx          # 404 handler
 │   │   ├── routes/                       # Routing guards & configuration
 │   │   │   ├── AppRoutes.jsx             # React Router configuration
@@ -475,18 +472,18 @@ To promote the first registered user to administrator in a development environme
 | `/admin/users` | `AdminUsersPage` | `admin` | Full user management portal with search, filtering, status toggling, and role assignment |
 | `/admin/hostels` | `AdminHostelsPage` | `admin` | Hostel block directory, warden assignment, block creation, and status controls |
 | `/admin/rooms` | `AdminRoomsPage` | `admin` | Room inventory directory with capacity guards and integrated `BedManager` drawer |
-| `/admin/reports` | `AdminInventoryReportPage` | `admin` | System-wide inventory analytics, capacity distribution, and database integrity diagnostics |
-| `/student` | `RoleDashboardPage` | `student` | Student overview with room info, complaint status, and quick links |
-| `/student/allocation` | `ModulePlaceholderPage` | `student` | Room and bed allocation details module |
-| `/student/complaints` | `ModulePlaceholderPage` | `student` | Maintenance complaint submission & tracking module |
-| `/student/notices` | `ModulePlaceholderPage` | `student` | Hostel notice board module |
-| `/warden` | `RoleDashboardPage` | `warden` | Warden overview with occupancy metrics, complaints, and visitor logs |
-| `/warden/rooms` | `ModulePlaceholderPage` | `warden` | Room inspection and occupancy management module |
-| `/warden/visitors` | `ModulePlaceholderPage` | `warden` | Visitor log and gate pass monitoring module |
-| `/warden/complaints` | `ModulePlaceholderPage` | `warden` | Student complaint assignment and resolution module |
+| `/admin/allocations` | `AdminAllocationsPage` | `admin` | Room & bed allocation management, bed vacancies, and assignment |
+| `/admin/complaints` | `AdminComplaintsPage` | `admin` | Complaint registry, priority tracking, and staff maintenance assignment |
+| `/admin/reports` | `AdminReportsPage` | `admin` | System-wide occupancy statistics, complaint analytics, and inventory audit |
+| `/student` | `RoleDashboardPage` | `student` | Student overview with active room info, complaint summary, and quick links |
+| `/student/allocation` | `StudentAllocationPage` | `student` | View current room and bed allocation details and status |
+| `/student/complaints` | `StudentComplaintsPage` | `student` | Submit grievances and monitor repair progress in real time |
+| `/student/notices` | `StudentNoticesPage` | `student` | Hostel circulars and official notice board |
+| `/warden` | `RoleDashboardPage` | `warden` | Warden overview with occupancy metrics, active complaints, and visitors |
+| `/warden/visitors` | `WardenVisitorsPage` | `warden` | Gate pass check-in and 1-click check-out tracking |
+| `/warden/complaints` | `AdminComplaintsPage` | `warden` | Student complaint assignment and grievance resolution |
 | `/staff` | `RoleDashboardPage` | `staff` | Maintenance staff overview with active repair tasks & workload |
-| `/staff/tasks` | `ModulePlaceholderPage` | `staff` | Assigned maintenance work orders module |
-| `/staff/maintenance` | `ModulePlaceholderPage` | `staff` | Maintenance history and completion logs module |
+| `/staff/tasks` | `StaffTasksPage` | `staff` | Assigned maintenance work orders and status progression |
 | `*` | `NotFoundPage` | Public | Custom 404 page with return-to-home navigation |
 
 ### CSRF & API Client Configuration
