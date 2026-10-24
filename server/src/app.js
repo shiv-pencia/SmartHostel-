@@ -33,9 +33,25 @@ app.use(helmet());
 /*
  * Browser CORS configuration
  */
+const allowedOrigins = [
+  env.clientUrl,
+  "http://localhost:5173",
+  "http://127.0.0.1:5173",
+  "http://localhost:5174",
+  "http://127.0.0.1:5174",
+  "http://localhost:3000",
+  "http://127.0.0.1:3000",
+];
+
 app.use(
   cors({
-    origin: env.clientUrl,
+    origin: (origin, callback) => {
+      // Allow requests with no origin (curl, mobile, server-to-server) or in allowed list
+      if (!origin || allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+      return callback(null, false);
+    },
     credentials: true,
     allowedHeaders: [
       "Content-Type",
@@ -52,13 +68,13 @@ app.use(
 );
 
 /*
- * General API rate limit
+ * General API rate limit (permissive in development)
  */
 app.use(
   "/api",
   rateLimit({
     windowMs: 15 * 60 * 1000,
-    limit: 100,
+    limit: env.nodeEnv === "development" ? 3000 : 100,
     standardHeaders: "draft-8",
     legacyHeaders: false,
   })
