@@ -9,6 +9,7 @@
     "start": "node src/server.js",
     "seed": "node src/seed.js",
     "seed:users": "node src/seedUsers.js",
+    "seed:hostels": "node src/seedIITGHostels.js",
     "test": "node --test"
   },
   "keywords": [],

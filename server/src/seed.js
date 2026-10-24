@@ -8,6 +8,7 @@ import Allocation from "./models/allocation.model.js";
 import Complaint from "./models/complaint.model.js";
 import Notice from "./models/notice.model.js";
 import Visitor from "./models/visitor.model.js";
+import { iitgHostelsData } from "./seedIITGHostels.js";
 
 async function seedDatabase() {
     console.log("🌱 Connecting to MongoDB for database seeding...");
@@ -87,33 +88,23 @@ async function seedDatabase() {
             }),
         ]);
 
-    console.log("🏢 Creating Hostels...");
-    const [brahmaputra, disang, kapili] = await Promise.all([
-        Hostel.create({
-            name: "Brahmaputra Hostel",
-            code: "BRH",
-            location: "North Campus, IIT Guwahati",
-            genderPolicy: "male",
-            capacity: 120,
+    console.log("🏢 Creating all 14 IIT Guwahati Hostels...");
+    const hostelMap = new Map();
+
+    for (const hData of iitgHostelsData) {
+        const hostel = await Hostel.create({
+            name: hData.name,
+            code: hData.code,
+            location: hData.location,
+            genderPolicy: hData.genderPolicy,
             isActive: true,
-        }),
-        Hostel.create({
-            name: "Disang Hostel",
-            code: "DIS",
-            location: "East Campus, IIT Guwahati",
-            genderPolicy: "female",
-            capacity: 100,
-            isActive: true,
-        }),
-        Hostel.create({
-            name: "Kapili Hostel",
-            code: "KAP",
-            location: "Central Campus, IIT Guwahati",
-            genderPolicy: "coed",
-            capacity: 80,
-            isActive: true,
-        }),
-    ]);
+        });
+        hostelMap.set(hData.code, hostel);
+    }
+
+    const brahmaputra = hostelMap.get("BRH");
+    const disang = hostelMap.get("DIS");
+    const kapili = hostelMap.get("KAP");
 
     console.log("🚪 Creating Rooms & Beds...");
     // Brahmaputra Rooms
