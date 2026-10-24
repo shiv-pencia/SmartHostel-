@@ -44,6 +44,16 @@ export const dashboardNavigation = {
             icon: BedDouble,
         },
         {
+            label: "Allocations",
+            path: "/admin/allocations",
+            icon: ClipboardList,
+        },
+        {
+            label: "Complaints",
+            path: "/admin/complaints",
+            icon: MessageSquareWarning,
+        },
+        {
             label: "Reports",
             path: "/admin/reports",
             icon: ChartColumnIncreasing,

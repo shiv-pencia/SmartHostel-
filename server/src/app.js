@@ -14,6 +14,8 @@ import hostelRoutes from "./routes/hostel.routes.js";
 import roomRoutes from "./routes/room.routes.js";
 import bedRoutes from "./routes/bed.routes.js";
 import reportRoutes from "./routes/report.routes.js";
+import allocationRoutes from "./routes/allocation.routes.js";
+import complaintRoutes from "./routes/complaint.routes.js";
 
 import csrfProtection from "./middlewares/csrf.middleware.js";
 import notFoundMiddleware from "./middlewares/notFound.middleware.js";
@@ -105,6 +107,8 @@ app.use("/api/v1/hostels", hostelRoutes);
 app.use("/api/v1/rooms", roomRoutes);
 app.use("/api/v1/beds", bedRoutes);
 app.use("/api/v1/reports", reportRoutes);
+app.use("/api/v1/allocations", allocationRoutes);
+app.use("/api/v1/complaints", complaintRoutes);
 
 /*
  * Error middleware

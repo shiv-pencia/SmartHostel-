@@ -6,6 +6,7 @@ import Room from "../models/room.model.js";
 import Bed from "../models/bed.model.js";
 
 import ApiError from "../utils/ApiError.js";
+import { withOptionalTransaction } from "../utils/transaction.js";
 
 /*
  * GET BED BY ID HELPER
@@ -23,13 +24,14 @@ const findBedOrThrow = async (bedId) => {
 /*
  * CREATE BED
  *
- * The room counter and bed insertion are
- * committed together in a MongoDB transaction.
+ * If running on a replica set, room counter and bed insertion
+ * are committed together in a MongoDB transaction.
+ * If running on a standalone MongoDB instance, compensatory rollback
+ * ensures consistent state if bed creation fails.
  */
 export const createBed = async (roomId, data) => {
-    return mongoose.connection.transaction(async (session) => {
-        const room = await Room.findById(roomId)
-            .session(session);
+    return withOptionalTransaction(async (session) => {
+        const room = await Room.findById(roomId).session(session);
 
         if (!room) {
             throw new ApiError(404, "Room not found");
@@ -42,8 +44,7 @@ export const createBed = async (roomId, data) => {
             );
         }
 
-        const hostel = await Hostel.findById(room.hostel)
-            .session(session);
+        const hostel = await Hostel.findById(room.hostel).session(session);
 
         if (!hostel) {
             throw new ApiError(
@@ -79,7 +80,7 @@ export const createBed = async (roomId, data) => {
             },
             {
                 returnDocument: "after",
-                session,
+                ...(session ? { session } : {}),
             }
         );
 
@@ -91,20 +92,30 @@ export const createBed = async (roomId, data) => {
         }
 
         /*
-         * Create the bed in the same transaction.
+         * Create the bed.
          */
-        const [bed] = await Bed.create(
-            [
-                {
-                    room: room._id,
-                    bedNumber: data.bedNumber,
-                    operationalStatus: "usable",
-                },
-            ],
-            { session }
-        );
+        try {
+            const [bed] = await Bed.create(
+                [
+                    {
+                        room: room._id,
+                        bedNumber: data.bedNumber,
+                        operationalStatus: "usable",
+                    },
+                ],
+                session ? { session } : {}
+            );
 
-        return bed.toSafeObject();
+            return bed.toSafeObject();
+        } catch (error) {
+            if (!session) {
+                // Manually roll back reserved bed slot if transactions are unsupported
+                await Room.findByIdAndUpdate(room._id, {
+                    $inc: { bedCount: -1 },
+                });
+            }
+            throw error;
+        }
     });
 };
 

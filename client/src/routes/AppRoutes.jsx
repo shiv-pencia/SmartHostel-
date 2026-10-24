@@ -20,8 +20,14 @@ import RegisterPage from "../features/auth/pages/RegisterPage.jsx";
 import AdminUsersPage from "../features/users/pages/AdminUsersPage.jsx";
 import AdminHostelsPage from "../features/hostels/pages/AdminHostelsPage.jsx";
 import AdminRoomsPage from "../features/rooms/pages/AdminRoomsPage.jsx";
+import AdminAllocationsPage from "../features/allocations/pages/AdminAllocationsPage.jsx";
+import StudentAllocationPage from "../features/allocations/pages/StudentAllocationPage.jsx";
 
-import AdminInventoryReportPage from "../features/reports/pages/AdminInventoryReportPage.jsx";
+import StudentComplaintsPage from "../features/complaints/pages/StudentComplaintsPage.jsx";
+import AdminComplaintsPage from "../features/complaints/pages/AdminComplaintsPage.jsx";
+import StaffTasksPage from "../features/complaints/pages/StaffTasksPage.jsx";
+
+import AdminReportsPage from "../features/reports/pages/AdminReportsPage.jsx";
 
 import ProtectedRoute from "./ProtectedRoute.jsx";
 import RoleRoute from "./RoleRoute.jsx";
@@ -101,10 +107,20 @@ function AppRoutes() {
                             element={<AdminRoomsPage />}
                         />
 
-                        {/* Inventory reporting */}
+                        <Route
+                            path="allocations"
+                            element={<AdminAllocationsPage />}
+                        />
+
+                        <Route
+                            path="complaints"
+                            element={<AdminComplaintsPage />}
+                        />
+
+                        {/* Operations & Inventory reporting */}
                         <Route
                             path="reports"
-                            element={<AdminInventoryReportPage />}
+                            element={<AdminReportsPage />}
                         />
 
                         <Route
@@ -131,20 +147,12 @@ function AppRoutes() {
 
                         <Route
                             path="allocation"
-                            element={
-                                <ModulePlaceholderPage
-                                    title="My Allocation"
-                                />
-                            }
+                            element={<StudentAllocationPage />}
                         />
 
                         <Route
                             path="complaints"
-                            element={
-                                <ModulePlaceholderPage
-                                    title="My Complaints"
-                                />
-                            }
+                            element={<StudentComplaintsPage />}
                         />
 
                         <Route
@@ -193,11 +201,7 @@ function AppRoutes() {
 
                         <Route
                             path="complaints"
-                            element={
-                                <ModulePlaceholderPage
-                                    title="Complaint Management"
-                                />
-                            }
+                            element={<AdminComplaintsPage />}
                         />
                     </Route>
                 </Route>
@@ -219,11 +223,7 @@ function AppRoutes() {
 
                         <Route
                             path="tasks"
-                            element={
-                                <ModulePlaceholderPage
-                                    title="Assigned Tasks"
-                                />
-                            }
+                            element={<StaffTasksPage />}
                         />
 
                         <Route
