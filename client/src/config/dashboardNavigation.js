@@ -97,6 +97,11 @@ export const dashboardNavigation = {
             icon: BedDouble,
         },
         {
+            label: "Allocations",
+            path: "/warden/allocations",
+            icon: ClipboardList,
+        },
+        {
             label: "Visitors",
             path: "/warden/visitors",
             icon: ContactRound,
@@ -104,7 +109,12 @@ export const dashboardNavigation = {
         {
             label: "Complaints",
             path: "/warden/complaints",
-            icon: ClipboardList,
+            icon: MessageSquareWarning,
+        },
+        {
+            label: "Reports",
+            path: "/warden/reports",
+            icon: ChartColumnIncreasing,
         },
     ],
 

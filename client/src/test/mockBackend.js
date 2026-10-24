@@ -722,6 +722,57 @@ export function createMockBackend({
         ];
     });
 
+    /*
+     * NOTICES
+     */
+    mock.onGet(/\/notices.*/).reply(() => {
+        return [
+            200,
+            success([
+                {
+                    id: "notice-1",
+                    title: "Special Dinner & Revised Mess Timings",
+                    content: "Mess dinner timings for the weekend are extended until 10:30 PM.",
+                    category: "mess",
+                    priority: "normal",
+                    publishedBy: { id: "warden-1", name: "Dr. Suresh Verma", role: "warden" },
+                    createdAt: new Date().toISOString(),
+                },
+            ]),
+        ];
+    });
+
+    /*
+     * VISITORS
+     */
+    mock.onGet(/\/visitors.*/).reply(() => {
+        return [
+            200,
+            success([
+                {
+                    id: "visitor-1",
+                    visitorName: "Sunil Sharma",
+                    visitorPhone: "9812345678",
+                    student: studentFixture,
+                    hostel: { id: "hostel-1", name: "Brahmaputra Hostel", code: "BRH" },
+                    purpose: "Guardian visit",
+                    idProofType: "Aadhaar",
+                    checkIn: new Date().toISOString(),
+                    checkOut: null,
+                    status: "inside",
+                    recordedBy: "Warden",
+                },
+            ]),
+        ];
+    });
+
+    mock.onPatch(/\/visitors\/[^/]+\/checkout/).reply(() => {
+        return [
+            200,
+            success({ id: "visitor-1", status: "checked_out", checkOut: new Date().toISOString() }),
+        ];
+    });
+
     return {
         mock,
         users,

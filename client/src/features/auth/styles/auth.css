@@ -193,3 +193,48 @@
         font-size: 25px;
     }
 }
+
+/* Demo Quick Fill for presentation */
+
+.demo-credentials-box {
+    margin-top: 22px;
+    padding: 16px;
+    background: #f8fafc;
+    border: 1px dashed #cbd5e1;
+    border-radius: 10px;
+    text-align: center;
+}
+
+.demo-credentials-box p {
+    margin: 0 0 10px;
+    font-size: 12px;
+    font-weight: 650;
+    color: #475569;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.demo-pills {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.demo-pill {
+    padding: 5px 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 20px;
+    background: white;
+    font-size: 12px;
+    font-weight: 600;
+    color: #334155;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.demo-pill:hover {
+    background: #eff6ff;
+    border-color: #3b82f6;
+    color: #1d4ed8;
+}

@@ -12,7 +12,6 @@ import HomePage from "../pages/HomePage.jsx";
 import NotFoundPage from "../pages/NotFoundPage.jsx";
 
 import RoleDashboardPage from "../pages/RoleDashboardPage.jsx";
-import ModulePlaceholderPage from "../pages/ModulePlaceholderPage.jsx";
 
 import LoginPage from "../features/auth/pages/LoginPage.jsx";
 import RegisterPage from "../features/auth/pages/RegisterPage.jsx";
@@ -26,6 +25,9 @@ import StudentAllocationPage from "../features/allocations/pages/StudentAllocati
 import StudentComplaintsPage from "../features/complaints/pages/StudentComplaintsPage.jsx";
 import AdminComplaintsPage from "../features/complaints/pages/AdminComplaintsPage.jsx";
 import StaffTasksPage from "../features/complaints/pages/StaffTasksPage.jsx";
+
+import StudentNoticesPage from "../features/notices/pages/StudentNoticesPage.jsx";
+import WardenVisitorsPage from "../features/visitors/pages/WardenVisitorsPage.jsx";
 
 import AdminReportsPage from "../features/reports/pages/AdminReportsPage.jsx";
 
@@ -157,11 +159,7 @@ function AppRoutes() {
 
                         <Route
                             path="notices"
-                            element={
-                                <ModulePlaceholderPage
-                                    title="Hostel Notices"
-                                />
-                            }
+                            element={<StudentNoticesPage />}
                         />
                     </Route>
                 </Route>
@@ -183,25 +181,27 @@ function AppRoutes() {
 
                         <Route
                             path="rooms"
-                            element={
-                                <ModulePlaceholderPage
-                                    title="Room Management"
-                                />
-                            }
+                            element={<AdminRoomsPage />}
+                        />
+
+                        <Route
+                            path="allocations"
+                            element={<AdminAllocationsPage />}
                         />
 
                         <Route
                             path="visitors"
-                            element={
-                                <ModulePlaceholderPage
-                                    title="Visitor Management"
-                                />
-                            }
+                            element={<WardenVisitorsPage />}
                         />
 
                         <Route
                             path="complaints"
                             element={<AdminComplaintsPage />}
+                        />
+
+                        <Route
+                            path="reports"
+                            element={<AdminReportsPage />}
                         />
                     </Route>
                 </Route>
@@ -228,11 +228,7 @@ function AppRoutes() {
 
                         <Route
                             path="maintenance"
-                            element={
-                                <ModulePlaceholderPage
-                                    title="Maintenance Records"
-                                />
-                            }
+                            element={<StaffTasksPage />}
                         />
                     </Route>
                 </Route>

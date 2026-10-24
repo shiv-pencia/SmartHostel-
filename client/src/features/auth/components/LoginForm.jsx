@@ -194,6 +194,56 @@ function LoginForm() {
             >
                 {isSubmitting ? "Signing in..." : "Sign In"}
             </button>
+
+            <div className="demo-credentials-box">
+                <p>Presentation Demo Accounts</p>
+                <div className="demo-pills">
+                    <button
+                        type="button"
+                        className="demo-pill"
+                        onClick={() => {
+                            setFormData({ email: "admin@example.com", password: "AdminPass@123" });
+                            setErrors({});
+                            setServerError("");
+                        }}
+                    >
+                        👑 Admin
+                    </button>
+                    <button
+                        type="button"
+                        className="demo-pill"
+                        onClick={() => {
+                            setFormData({ email: "warden@example.com", password: "WardenPass@123" });
+                            setErrors({});
+                            setServerError("");
+                        }}
+                    >
+                        🏢 Warden
+                    </button>
+                    <button
+                        type="button"
+                        className="demo-pill"
+                        onClick={() => {
+                            setFormData({ email: "staff@example.com", password: "StaffPass@123" });
+                            setErrors({});
+                            setServerError("");
+                        }}
+                    >
+                        🛠️ Staff
+                    </button>
+                    <button
+                        type="button"
+                        className="demo-pill"
+                        onClick={() => {
+                            setFormData({ email: "student@example.com", password: "StudentPass@123" });
+                            setErrors({});
+                            setServerError("");
+                        }}
+                    >
+                        🎓 Student
+                    </button>
+                </div>
+            </div>
         </form>
     );
 }

@@ -16,6 +16,8 @@ import bedRoutes from "./routes/bed.routes.js";
 import reportRoutes from "./routes/report.routes.js";
 import allocationRoutes from "./routes/allocation.routes.js";
 import complaintRoutes from "./routes/complaint.routes.js";
+import noticeRoutes from "./routes/notice.routes.js";
+import visitorRoutes from "./routes/visitor.routes.js";
 
 import csrfProtection from "./middlewares/csrf.middleware.js";
 import notFoundMiddleware from "./middlewares/notFound.middleware.js";
@@ -109,6 +111,8 @@ app.use("/api/v1/beds", bedRoutes);
 app.use("/api/v1/reports", reportRoutes);
 app.use("/api/v1/allocations", allocationRoutes);
 app.use("/api/v1/complaints", complaintRoutes);
+app.use("/api/v1/notices", noticeRoutes);
+app.use("/api/v1/visitors", visitorRoutes);
 
 /*
  * Error middleware

@@ -1,0 +1,153 @@
+.notices-page {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.notices-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+}
+
+.notices-header h2 {
+    margin: 8px 0;
+    font-size: 26px;
+    color: #0f172a;
+}
+
+.notices-header p {
+    margin: 0;
+    color: #64748b;
+    font-size: 14px;
+}
+
+.notices-filter-bar {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.notices-filter-btn {
+    padding: 7px 16px;
+    background: white;
+    border: 1px solid #cbd5e1;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #475569;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.notices-filter-btn:hover {
+    background: #f1f5f9;
+    border-color: #94a3b8;
+}
+
+.notices-filter-btn.is-active {
+    background: #2563eb;
+    color: white;
+    border-color: #2563eb;
+}
+
+.notices-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+    gap: 20px;
+}
+
+.notice-card {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.notice-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(15, 23, 42, 0.06);
+}
+
+.notice-card.urgent {
+    border-left: 4px solid #e11d48;
+}
+
+.notice-card.important {
+    border-left: 4px solid #d97706;
+}
+
+.notice-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.notice-category {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    background: #eff6ff;
+    color: #1d4ed8;
+}
+
+.notice-category.mess {
+    background: #fef3c7;
+    color: #b45309;
+}
+
+.notice-category.maintenance {
+    background: #f1f5f9;
+    color: #475569;
+}
+
+.notice-category.curfew {
+    background: #fee2e2;
+    color: #b91c1c;
+}
+
+.notice-date {
+    font-size: 12px;
+    color: #94a3b8;
+}
+
+.notice-title {
+    margin: 0;
+    font-size: 17px;
+    font-weight: 650;
+    color: #0f172a;
+    line-height: 1.4;
+}
+
+.notice-content {
+    margin: 0;
+    color: #334155;
+    font-size: 13.5px;
+    line-height: 1.6;
+}
+
+.notice-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 12px;
+    border-top: 1px solid #f1f5f9;
+    font-size: 12px;
+    color: #64748b;
+}
+
+.notice-publisher {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 600;
+}
