@@ -60,7 +60,7 @@ router.patch(
 
 router.patch(
     "/:roomId/status",
-    authorizeRoles("admin"),
+    authorizeRoles("admin", "warden"),
     validateObjectId("roomId"),
     validate(updateRoomStatusSchema),
     roomController.updateRoomStatus

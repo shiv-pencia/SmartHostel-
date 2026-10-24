@@ -43,7 +43,7 @@ router.patch(
  */
 router.patch(
     "/:bedId/status",
-    authorizeRoles("admin"),
+    authorizeRoles("admin", "warden"),
     validateObjectId("bedId"),
     validate(updateBedStatusSchema),
     bedController.updateBedStatus

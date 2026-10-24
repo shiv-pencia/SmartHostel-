@@ -31,7 +31,7 @@ router.get(
 
 router.post(
     "/",
-    authorizeRoles("admin"),
+    authorizeRoles("admin", "warden"),
     validate(createAllocationSchema),
     allocationController.createAllocation
 );
@@ -44,7 +44,7 @@ router.get(
 
 router.patch(
     "/:allocationId/vacate",
-    authorizeRoles("admin"),
+    authorizeRoles("admin", "warden"),
     validateObjectId("allocationId"),
     allocationController.vacateStudentAllocation
 );

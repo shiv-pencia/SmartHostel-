@@ -21,56 +21,53 @@ const router = Router();
  * 2. The admin role
  */
 
-router.use(
-    authenticate,
-    authorizeRoles("admin")
-);
+router.use(authenticate);
 
 /*
  * GET ALL USERS
- * Supports search, filters and pagination
+ * Supports search, filters and pagination (Admin and Warden)
  */
-
 router.get(
     "/",
+    authorizeRoles("admin", "warden"),
     userController.listUsers
 );
 
 /*
- * GET USER BY ID
+ * GET USER BY ID (Admin and Warden)
  */
-
 router.get(
     "/:userId",
+    authorizeRoles("admin", "warden"),
     userController.getUserById
 );
 
 /*
- * UPDATE BASIC USER DETAILS
+ * UPDATE BASIC USER DETAILS (Admin only)
  */
-
 router.patch(
     "/:userId",
+    authorizeRoles("admin"),
     validate(updateUserSchema),
     userController.updateUser
 );
 
 /*
- * ACTIVATE / DEACTIVATE USER
+ * ACTIVATE / DEACTIVATE USER (Admin only)
  */
-
 router.patch(
     "/:userId/status",
+    authorizeRoles("admin"),
     validate(updateUserStatusSchema),
     userController.updateUserStatus
 );
 
 /*
- * CHANGE USER ROLE
+ * CHANGE USER ROLE (Admin only)
  */
-
 router.patch(
     "/:userId/role",
+    authorizeRoles("admin"),
     validate(updateUserRoleSchema),
     userController.updateUserRole
 );
