@@ -26,10 +26,10 @@ const validateId = (id, fieldName) => {
 const requireAdmin = async (adminId, session) => {
     const admin = await User.findById(adminId).session(session);
 
-    if (!admin || !admin.isActive || admin.role !== "admin") {
+    if (!admin || !admin.isActive || (admin.role !== "admin" && admin.role !== "warden")) {
         throw new ApiError(
             403,
-            "Only an active administrator can manage allocations"
+            "Only an active administrator or warden can manage allocations"
         );
     }
 

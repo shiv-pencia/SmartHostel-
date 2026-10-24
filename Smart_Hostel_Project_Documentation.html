@@ -1,0 +1,1661 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Smart Hostel Management System — Complete Technical Documentation</title>
+<style>
+@page {
+    size: A4;
+    margin: 18mm 16mm 20mm 16mm;
+    @bottom-center {
+        content: "Smart Hostel Management System — Technical Documentation & Viva Reference";
+        font-size: 7.5pt;
+        color: #94a3b8;
+    }
+    @bottom-right {
+        content: counter(page);
+        font-size: 8pt;
+        font-weight: 700;
+        color: #2563eb;
+    }
+}
+
+* {
+    box-sizing: border-box;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    color: #1e293b;
+    background: #ffffff;
+    line-height: 1.55;
+    font-size: 9.5pt;
+    margin: 0;
+    padding: 0;
+}
+
+/* COVER PAGE */
+.cover-page {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 40px 20px 20px 20px;
+    page-break-after: always;
+    border: 3px double #2563eb;
+    border-radius: 8px;
+    box-sizing: border-box;
+}
+
+.cover-header {
+    text-align: center;
+    border-bottom: 2px solid #e2e8f0;
+    padding-bottom: 20px;
+}
+
+.cover-institution {
+    font-size: 13pt;
+    font-weight: 700;
+    color: #475569;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+}
+
+.cover-course {
+    font-size: 10.5pt;
+    font-weight: 600;
+    color: #2563eb;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.cover-body {
+    text-align: center;
+    margin: auto 0;
+}
+
+.cover-title {
+    font-size: 28pt;
+    font-weight: 800;
+    color: #0f172a;
+    line-height: 1.2;
+    margin: 0 0 16px 0;
+    letter-spacing: -0.5px;
+}
+
+.cover-subtitle {
+    font-size: 13pt;
+    color: #334155;
+    max-width: 650px;
+    margin: 0 auto 30px auto;
+    line-height: 1.5;
+}
+
+.cover-badge-row {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 30px;
+}
+
+.cover-badge {
+    background: #eff6ff;
+    color: #1d4ed8;
+    border: 1px solid #bfdbfe;
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 8.5pt;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.cover-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    max-width: 600px;
+    margin: 0 auto;
+    text-align: left;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 16px 20px;
+}
+
+.cover-grid-item strong {
+    display: block;
+    font-size: 7.5pt;
+    color: #64748b;
+    text-transform: uppercase;
+    margin-bottom: 2px;
+}
+
+.cover-grid-item span {
+    font-size: 9pt;
+    font-weight: 600;
+    color: #0f172a;
+}
+
+.cover-footer {
+    text-align: center;
+    border-top: 1px solid #e2e8f0;
+    padding-top: 16px;
+    font-size: 8.5pt;
+    color: #64748b;
+}
+
+/* HEADINGS & CHAPTERS */
+.chapter-header {
+    border-bottom: 2.5px solid #2563eb;
+    padding-bottom: 10px;
+    margin-top: 0;
+    margin-bottom: 18px;
+    page-break-after: avoid;
+}
+
+.chapter-number {
+    font-size: 9pt;
+    font-weight: 800;
+    color: #2563eb;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+h1.chapter-title {
+    font-size: 19pt;
+    font-weight: 800;
+    color: #0f172a;
+    margin: 4px 0 0 0;
+    letter-spacing: -0.3px;
+}
+
+h2 {
+    font-size: 12.5pt;
+    font-weight: 700;
+    color: #0f172a;
+    border-left: 3.5px solid #2563eb;
+    padding-left: 8px;
+    margin: 22px 0 8px 0;
+    page-break-after: avoid;
+}
+
+h3 {
+    font-size: 10.5pt;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 14px 0 6px 0;
+    page-break-after: avoid;
+}
+
+h4 {
+    font-size: 9.5pt;
+    font-weight: 700;
+    color: #334155;
+    margin: 10px 0 4px 0;
+    page-break-after: avoid;
+}
+
+p {
+    margin: 0 0 8px 0;
+    text-align: justify;
+    color: #334155;
+}
+
+ul, ol {
+    margin: 4px 0 10px 20px;
+    padding: 0;
+}
+
+li {
+    margin-bottom: 3px;
+    color: #334155;
+}
+
+/* CODE BLOCKS */
+.code-container {
+    background: #0f172a;
+    border-radius: 6px;
+    margin: 10px 0 14px 0;
+    overflow: hidden;
+    page-break-inside: avoid;
+    border: 1px solid #1e293b;
+}
+
+.code-header {
+    background: #1e293b;
+    padding: 5px 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #334155;
+}
+
+.code-filename {
+    font-family: ui-monospace, Menlo, Monaco, monospace;
+    font-size: 7.5pt;
+    color: #cbd5e1;
+    font-weight: 600;
+}
+
+.code-lang {
+    font-size: 7pt;
+    color: #94a3b8;
+    text-transform: uppercase;
+    font-weight: 700;
+}
+
+pre.code-pre {
+    margin: 0;
+    padding: 10px 14px;
+    overflow-x: auto;
+    font-family: ui-monospace, Menlo, Monaco, Consolas, monospace;
+    font-size: 8pt;
+    line-height: 1.45;
+    color: #f8fafc;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+code {
+    font-family: ui-monospace, Menlo, Monaco, Consolas, monospace;
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    border-radius: 4px;
+    padding: 1px 4px;
+    font-size: 8pt;
+    color: #0f172a;
+}
+
+pre code {
+    background: transparent;
+    border: none;
+    padding: 0;
+    color: inherit;
+    font-size: inherit;
+}
+
+/* TABLES */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 8px 0 14px 0;
+    font-size: 8.5pt;
+    page-break-inside: avoid;
+}
+
+th, td {
+    padding: 6px 9px;
+    text-align: left;
+    border: 1px solid #e2e8f0;
+    vertical-align: top;
+}
+
+th {
+    background-color: #f1f5f9;
+    color: #0f172a;
+    font-weight: 700;
+    font-size: 8pt;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+tr:nth-child(even) td {
+    background-color: #f8fafc;
+}
+
+/* CALLOUTS */
+.callout {
+    background: #f8fafc;
+    border-left: 4px solid #3b82f6;
+    border-radius: 0 6px 6px 0;
+    padding: 10px 14px;
+    margin: 12px 0;
+    page-break-inside: avoid;
+}
+
+.callout.tip {
+    background: #f0fdf4;
+    border-left-color: #22c55e;
+}
+
+.callout.warning {
+    background: #fffbeb;
+    border-left-color: #f59e0b;
+}
+
+.callout.danger {
+    background: #fef2f2;
+    border-left-color: #ef4444;
+}
+
+.callout-title {
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 4px;
+    font-size: 9pt;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* DIAGRAMS & ASCII BOXES */
+.diagram-box {
+    background: #f8fafc;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    padding: 12px 14px;
+    margin: 12px 0;
+    font-family: ui-monospace, Menlo, Monaco, monospace;
+    font-size: 8pt;
+    line-height: 1.4;
+    color: #0f172a;
+    white-space: pre;
+    overflow-x: auto;
+    page-break-inside: avoid;
+}
+
+/* GRID LAYOUTS */
+.grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    page-break-inside: avoid;
+    margin: 10px 0;
+}
+
+.card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 10px 12px;
+}
+
+.card-title {
+    font-weight: 700;
+    font-size: 9pt;
+    color: #0f172a;
+    margin-bottom: 4px;
+    border-bottom: 1px solid #f1f5f9;
+    padding-bottom: 4px;
+}
+
+.page-break {
+    page-break-before: always;
+}
+
+/* VIVA Q&A */
+.viva-item {
+    margin-bottom: 14px;
+    page-break-inside: avoid;
+    border-left: 3px solid #2563eb;
+    padding-left: 10px;
+    background: #f8fafc;
+    border-radius: 0 4px 4px 0;
+    padding: 8px 12px;
+}
+
+.viva-q {
+    font-weight: 700;
+    color: #0f172a;
+    font-size: 9pt;
+    margin-bottom: 4px;
+}
+
+.viva-a {
+    color: #334155;
+    font-size: 8.5pt;
+    line-height: 1.5;
+}
+
+.viva-tag {
+    display: inline-block;
+    background: #dbeafe;
+    color: #1e40af;
+    font-size: 7pt;
+    font-weight: 700;
+    padding: 1px 6px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+}
+
+/* TOC */
+.toc-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.toc-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 0;
+    border-bottom: 1px dotted #cbd5e1;
+    font-size: 9pt;
+}
+
+.toc-title {
+    font-weight: 600;
+    color: #0f172a;
+}
+
+.toc-page {
+    font-weight: 700;
+    color: #2563eb;
+}
+
+.footer-note {
+    font-size: 7.5pt;
+    color: #94a3b8;
+    text-align: center;
+    border-top: 1px solid #e2e8f0;
+    padding-top: 8px;
+}
+</style>
+</head>
+<body>
+
+<!-- ========================================== -->
+<!-- COVER PAGE                                 -->
+<!-- ========================================== -->
+<div class="cover-page">
+    <div class="cover-header">
+        <div class="cover-institution">Department of Computer Science &amp; Engineering</div>
+        <div class="cover-course">Database Management Systems (DBMS) Project Documentation</div>
+    </div>
+
+    <div class="cover-body">
+        <div class="cover-badge-row">
+            <span class="cover-badge">Full-Stack MERN Architecture</span>
+            <span class="cover-badge">106 / 106 Tests Passing</span>
+            <span class="cover-badge">IIT Guwahati Campus Model</span>
+        </div>
+
+        <h1 class="cover-title">Smart Hostel Management System</h1>
+        <div class="cover-subtitle">
+            An End-to-End Enterprise Solution for Accommodation Management, Real-Time Vacancy Discovery, Maintenance Lifecycle, Analytics, and Resident Services
+        </div>
+
+        <div class="cover-grid">
+            <div class="cover-grid-item">
+                <strong>Primary Developer</strong>
+                <span>Shiv Prakash</span>
+            </div>
+            <div class="cover-grid-item">
+                <strong>Project Repository</strong>
+                <span>shiv-pencia/SmartHostel-</span>
+            </div>
+            <div class="cover-grid-item">
+                <strong>Database Engine</strong>
+                <span>MongoDB &bull; Mongoose 9</span>
+            </div>
+            <div class="cover-grid-item">
+                <strong>Frontend Framework</strong>
+                <span>React 19 &bull; Vite 8</span>
+            </div>
+            <div class="cover-grid-item">
+                <strong>Backend Framework</strong>
+                <span>Node.js &bull; Express 5</span>
+            </div>
+            <div class="cover-grid-item">
+                <strong>Seeded Residents</strong>
+                <span>507 Active Users</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="cover-footer">
+        Complete Technical Reference Manual &bull; Academic Viva Voce Preparation Guide &bull; October 2026
+    </div>
+</div>
+
+<!-- ========================================== -->
+<!-- TABLE OF CONTENTS                          -->
+<!-- ========================================== -->
+<div class="chapter-header">
+    <div class="chapter-number">Document Index</div>
+    <h1 class="chapter-title">Table of Contents</h1>
+</div>
+
+<ul class="toc-list">
+    <li class="toc-item"><span class="toc-title">Chapter 1: Project Introduction &amp; Objectives</span><span class="toc-page">Page 3</span></li>
+    <li class="toc-item"><span class="toc-title">Chapter 2: Technology Stack &amp; Package Architecture</span><span class="toc-page">Page 5</span></li>
+    <li class="toc-item"><span class="toc-title">Chapter 3: Overall Project Architecture &amp; System Design</span><span class="toc-page">Page 8</span></li>
+    <li class="toc-item"><span class="toc-title">Chapter 4: Complete Project Folder Structure &amp; File Manifest</span><span class="toc-page">Page 11</span></li>
+    <li class="toc-item"><span class="toc-title">Chapter 5: Database Design, Schema Constraints &amp; MongoDB Modeling</span><span class="toc-page">Page 14</span></li>
+    <li class="toc-item"><span class="toc-title">Chapter 6: Backend Implementation, Middleware &amp; API Engine</span><span class="toc-page">Page 19</span></li>
+    <li class="toc-item"><span class="toc-title">Chapter 7: Authentication, Session Management &amp; Security</span><span class="toc-page">Page 24</span></li>
+    <li class="toc-item"><span class="toc-title">Chapter 8: Frontend Architecture &amp; Component Engineering</span><span class="toc-page">Page 28</span></li>
+    <li class="toc-item"><span class="toc-title">Chapter 9: Feature-by-Feature Implementation Guide</span><span class="toc-page">Page 32</span></li>
+    <li class="toc-item"><span class="toc-title">Chapter 10: Complete REST API Documentation Reference</span><span class="toc-page">Page 37</span></li>
+    <li class="toc-item"><span class="toc-title">Chapter 11: Critical Code Analysis &amp; Algorithmic Breakdown</span><span class="toc-page">Page 42</span></li>
+    <li class="toc-item"><span class="toc-title">Chapter 12: End-to-End Execution Flows &amp; Sequence Traces</span><span class="toc-page">Page 46</span></li>
+    <li class="toc-item"><span class="toc-title">Chapter 13: Installation, Configuration &amp; Deployment Guide</span><span class="toc-page">Page 49</span></li>
+    <li class="toc-item"><span class="toc-title">Chapter 14: Testing Strategy, Quality Assurance &amp; Debugging</span><span class="toc-page">Page 52</span></li>
+    <li class="toc-item"><span class="toc-title">Chapter 15: Security Architecture, Edge Cases &amp; Limitations</span><span class="toc-page">Page 55</span></li>
+    <li class="toc-item"><span class="toc-title">Chapter 16: Viva Voce &amp; Technical Interview Preparation (25+ Questions)</span><span class="toc-page">Page 58</span></li>
+    <li class="toc-item"><span class="toc-title">Chapter 17: Conclusion &amp; Key Learnings</span><span class="toc-page">Page 64</span></li>
+    <li class="toc-item"><span class="toc-title">Glossary of Technical Terms &amp; Appendices</span><span class="toc-page">Page 65</span></li>
+</ul>
+
+<div class="page-break"></div>
+
+<!-- ========================================== -->
+<!-- CHAPTER 1: INTRODUCTION                   -->
+<!-- ========================================== -->
+<div class="chapter-header">
+    <div class="chapter-number">Chapter 1</div>
+    <h1 class="chapter-title">Project Introduction &amp; Objectives</h1>
+</div>
+
+<h2>1.1 Project Overview</h2>
+<p>
+    The <strong>Smart Hostel Management System</strong> is a full-stack, enterprise-grade web application engineered to modernize and digitize the administration of residential campus hostels. Built using a robust <strong>MERN architecture (MongoDB, Express.js, React 19, Node.js)</strong> and bundled with <strong>Vite 8</strong>, the system replaces error-prone manual paper registers and fragmented spreadsheets with a unified, real-time database management platform.
+</p>
+<p>
+    The project addresses four foundational stakeholders within an academic university environment:
+</p>
+<ul>
+    <li><strong>Students:</strong> Can track their physical bed allocation details, submit maintenance grievances with category and priority parameters, monitor repair status updates, and read official hostel notices.</li>
+    <li><strong>Hostel Wardens:</strong> Oversee block occupancy, track student allocations, assign maintenance work orders to dedicated technical staff, and manage visitor gate pass check-ins and check-outs.</li>
+    <li><strong>Maintenance Staff:</strong> Access an assigned work-order queue, update real-time progress (<code>in_progress</code> &rarr; <code>resolved</code>), and provide timestamped resolution notes.</li>
+    <li><strong>System Administrators:</strong> Retain global authority over all 14 campus hostels, room capacities, physical bed provisioning, resident status mutations, and real-time database integrity audits.</li>
+</ul>
+
+<h2>1.2 Problems Solved by the System</h2>
+<div class="grid-2">
+    <div class="card">
+        <div class="card-title">&cross; Problems with Traditional Systems</div>
+        <ul>
+            <li><strong>Double Bed Allocation:</strong> Manual record keeping frequently leads to two students being assigned to the same physical bed.</li>
+            <li><strong>Grievance Black Hole:</strong> Maintenance complaints written on paper registers lack SLA tracking, status updates, or technician accountability.</li>
+            <li><strong>Inaccurate Occupancy Data:</strong> Administrators lack real-time visibility into vacant bed slots versus broken beds under repair.</li>
+            <li><strong>Security Blind Spots:</strong> Campus visitor logs kept in paper books are difficult to audit, search, or reconcile upon exit.</li>
+        </ul>
+    </div>
+    <div class="card">
+        <div class="card-title">&check; Solutions Delivered by Smart Hostel</div>
+        <ul>
+            <li><strong>Partial Unique Database Indexes:</strong> Mathematically prevents double active allocations directly at the database engine level.</li>
+            <li><strong>Audited Ticket Lifecycle:</strong> Enforces state-machine transitions (<code>pending</code> &rarr; <code>assigned</code> &rarr; <code>resolved</code>) with technician attribution.</li>
+            <li><strong>Live Aggregation Pipelines:</strong> Real-time calculations of vacancy, usable beds, and occupancy percentages across all 14 hostels.</li>
+            <li><strong>Digital Gate Passes:</strong> Instant check-in recording with ID proof logging and 1-click check-out timestamping.</li>
+        </ul>
+    </div>
+</div>
+
+<h2>1.3 Motivation &amp; Scope</h2>
+<p>
+    The primary motivation behind this project is to implement genuine database management principles—including <strong>referential integrity, compound indexing, transactional consistency, atomicity, and multi-stage aggregation pipelines</strong>—within a practical, modern web platform. Rather than building a generic CRUD mock-up, the system was built and tested against the actual campus topology of <strong>Indian Institute of Technology Guwahati (IIT Guwahati)</strong>, modeling all 14 official residential hostels with realistic floor plans, capacities, and resident populations.
+</p>
+
+<h2>1.4 Key Features at a Glance</h2>
+<table>
+    <thead>
+        <tr>
+            <th style="width: 25%;">Module</th>
+            <th style="width: 40%;">Primary Capabilities</th>
+            <th style="width: 35%;">Database / Technical Highlights</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><strong>Student Allocation</strong></td>
+            <td>Real-time bed discovery, room selection, student assignment, and 1-click checkout/vacation.</td>
+            <td>Compound partial unique indexes; MongoDB adaptive transaction sessions.</td>
+        </tr>
+        <tr>
+            <td><strong>Grievance Management</strong></td>
+            <td>Categorized ticket submission, priority tagging, warden technician dispatch, and resolution logging.</td>
+            <td>State machine constraints, user attribution references, real-time status filtering.</td>
+        </tr>
+        <tr>
+            <td><strong>Reports &amp; Analytics</strong></td>
+            <td>Live occupancy rates %, breakdown by room type, complaint category trends, and database integrity audits.</td>
+            <td>MongoDB aggregation pipelines (<code>$lookup</code>, <code>$group</code>, <code>$map</code>, <code>$cond</code>).</td>
+        </tr>
+        <tr>
+            <td><strong>Hostel &amp; Room Inventory</strong></td>
+            <td>Block management, gender segregation rules, floor definitions, and physical bed provisioning.</td>
+            <td>Compound uniqueness constraints (<code>hostel + roomNumber</code>, <code>room + bedNumber</code>).</td>
+        </tr>
+        <tr>
+            <td><strong>Notice Board &amp; Visitors</strong></td>
+            <td>Targeted hostel circulars, event announcements, visitor gate passes, and check-out auditing.</td>
+            <td>Targeted foreign keys, date-indexed sorting, status enumeration.</td>
+        </tr>
+    </tbody>
+</table>
+
+<div class="page-break"></div>
+
+<!-- ========================================== -->
+<!-- CHAPTER 2: TECH STACK                     -->
+<!-- ========================================== -->
+<div class="chapter-header">
+    <div class="chapter-number">Chapter 2</div>
+    <h1 class="chapter-title">Technology Stack &amp; Package Architecture</h1>
+</div>
+
+<h2>2.1 Full-Stack Architectural Layers</h2>
+<p>
+    The system utilizes a decoupled client-server architecture. The frontend is built as a responsive Single Page Application (SPA) communicating over HTTPS/JSON REST APIs with the Express backend, which interfaces directly with MongoDB via the Mongoose Object Data Modeling (ODM) library.
+</p>
+
+<div class="diagram-box">
++-----------------------------------------------------------------------------------+
+|                            CLIENT TIER (React 19 + Vite 8)                        |
+|   React Components  |  React Router v8  |  Context API (Auth)  |  Axios Client    |
++-----------------------------------------------------------------------------------+
+                                         |  JSON REST / HTTP-Only Cookies / CSRF
+                                         v
++-----------------------------------------------------------------------------------+
+|                            SERVER TIER (Node.js + Express 5)                      |
+|   Helmet &amp; Security | Dynamic CORS | Morgan Logging | Rate Limiting | Auth/RBAC   |
+|   Controllers       | Services     | Zod Validation | Error Handler | Mongoose    |
++-----------------------------------------------------------------------------------+
+                                         |  Mongoose Native Driver
+                                         v
++-----------------------------------------------------------------------------------+
+|                            DATABASE TIER (MongoDB 7+)                             |
+|   9 Collections | Partial Indexes | TTL Revocation | ACID Transactions | Pipelines|
++-----------------------------------------------------------------------------------+
+</div>
+
+<h2>2.2 Backend Dependencies (server/package.json)</h2>
+<table>
+    <thead>
+        <tr>
+            <th style="width: 22%;">Package Name</th>
+            <th style="width: 14%;">Version</th>
+            <th style="width: 64%;">Role and Implementation Justification in Project</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><code>express</code></td>
+            <td><code>^5.2.1</code></td>
+            <td>Core HTTP application server framework. Version 5 provides native asynchronous error propagation without requiring third-party wrappers for rejected promises.</td>
+        </tr>
+        <tr>
+            <td><code>mongoose</code></td>
+            <td><code>^9.9.4</code></td>
+            <td>Object Data Modeling (ODM) library for MongoDB. Enforces strict document schemas, type casting, validation hooks (pre-save, pre-validate), and index definitions.</td>
+        </tr>
+        <tr>
+            <td><code>jsonwebtoken</code></td>
+            <td><code>^9.0.3</code></td>
+            <td>Generates and verifies cryptographic HMAC SHA-256 (HS256) JSON Web Tokens containing user subject IDs, UUID tokens, and expiration times for stateless authentication.</td>
+        </tr>
+        <tr>
+            <td><code>bcryptjs</code></td>
+            <td><code>^3.0.3</code></td>
+            <td>Adaptive key derivation function using 12 salt rounds to securely hash resident passwords before persisting to database, mitigating rainbow table attacks.</td>
+        </tr>
+        <tr>
+            <td><code>zod</code></td>
+            <td><code>^4.6.5</code></td>
+            <td>TypeScript-first schema declaration and data validation library. Validates all incoming HTTP request bodies and route parameters before controllers are executed.</td>
+        </tr>
+        <tr>
+            <td><code>cors</code></td>
+            <td><code>^2.8.6</code></td>
+            <td>Cross-Origin Resource Sharing middleware configured with dynamic origin validation supporting <code>localhost</code> and <code>127.0.0.1</code> with credentials.</td>
+        </tr>
+        <tr>
+            <td><code>helmet</code></td>
+            <td><code>^8.3.0</code></td>
+            <td>Applies critical HTTP security response headers (Content-Security-Policy, X-Frame-Options, Strict-Transport-Security) to prevent clickjacking and XSS.</td>
+        </tr>
+        <tr>
+            <td><code>cookie-parser</code></td>
+            <td><code>^1.4.7</code></td>
+            <td>Parses the HTTP <code>Cookie</code> request header and populates <code>req.cookies</code>, enabling secure extraction of the <code>accessToken</code> cookie.</td>
+        </tr>
+        <tr>
+            <td><code>express-rate-limit</code></td>
+            <td><code>^8.7.0</code></td>
+            <td>Prevents Denial-of-Service (DoS) and brute-force credential stuffing by throttling IP requests within configurable time windows.</td>
+        </tr>
+        <tr>
+            <td><code>morgan</code></td>
+            <td><code>^1.12.0</code></td>
+            <td>HTTP request logger middleware producing clean colored terminal output during development for debugging routes, response times, and status codes.</td>
+        </tr>
+        <tr>
+            <td><code>dotenv</code></td>
+            <td><code>^17.4.2</code></td>
+            <td>Loads environment variables from <code>.env</code> file into <code>process.env</code> during system bootstrapping.</td>
+        </tr>
+    </tbody>
+</table>
+
+<h2>2.3 Frontend Dependencies (client/package.json)</h2>
+<table>
+    <thead>
+        <tr>
+            <th style="width: 22%;">Package Name</th>
+            <th style="width: 14%;">Version</th>
+            <th style="width: 64%;">Role and Implementation Justification in Project</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><code>react</code> &amp; <code>react-dom</code></td>
+            <td><code>^19.2.8</code></td>
+            <td>React 19 component library utilizing Concurrent Mode, optimized reconciliation algorithms, and hooks (<code>useState</code>, <code>useEffect</code>, <code>useCallback</code>, <code>useMemo</code>).</td>
+        </tr>
+        <tr>
+            <td><code>vite</code></td>
+            <td><code>^8.3.0</code></td>
+            <td>Next-generation frontend build tooling and local dev server powered by native ES modules. Yields production bundles in ~220ms.</td>
+        </tr>
+        <tr>
+            <td><code>react-router</code></td>
+            <td><code>^8.4.0</code></td>
+            <td>Client-side declarative routing engine managing public routes, role-guarded layouts, dynamic navigation redirects, and active route state.</td>
+        </tr>
+        <tr>
+            <td><code>axios</code></td>
+            <td><code>^1.20.0</code></td>
+            <td>Promise-based HTTP client featuring centralized interceptors for CSRF header injection (<code>X-Requested-With</code>) and normalized API error parsing.</td>
+        </tr>
+        <tr>
+            <td><code>lucide-react</code></td>
+            <td><code>^1.56.0</code></td>
+            <td>Accessible, modern SVG icon library used across dashboards, status pills, tables, and navigation menus.</td>
+        </tr>
+        <tr>
+            <td><code>vitest</code></td>
+            <td><code>^5.0.4</code></td>
+            <td>Native ESM integration test runner executing component, context, and mocked-API integration test suites in headless JSDOM environments.</td>
+        </tr>
+    </tbody>
+</table>
+
+<div class="page-break"></div>
+
+<!-- ========================================== -->
+<!-- CHAPTER 3: ARCHITECTURE                   -->
+<!-- ========================================== -->
+<div class="chapter-header">
+    <div class="chapter-number">Chapter 3</div>
+    <h1 class="chapter-title">Project Architecture &amp; System Design</h1>
+</div>
+
+<h2>3.1 System Architecture Overview</h2>
+<p>
+    The Smart Hostel Management System follows the classic <strong>Model-View-Controller-Service (MVCS)</strong> pattern. This design pattern strictly decouples HTTP transport logic from business execution and database queries, guaranteeing testability, maintainability, and clean code boundaries.
+</p>
+
+<div class="diagram-box">
++----------------------------------------------------------------------------------------------------+
+|                                      MVCS ARCHITECTURAL FLOW                                       |
++----------------------------------------------------------------------------------------------------+
+
+ [User Browser] 
+      |
+      | 1. HTTP Request (JSON body, Cookies, CSRF Header)
+      v
+ [Express Router] (/api/v1/...)
+      |
+      | 2. Passes through Global Middlewares (Helmet, CORS, RateLimit, CSRF)
+      v
+ [Route Layer] (e.g. allocation.routes.js)
+      |
+      | 3. Runs Route Middlewares: authenticate() &rarr; authorizeRoles("admin", "warden") &rarr; validate(schema)
+      v
+ [Controller Layer] (e.g. allocation.controller.js)
+      |
+      | 4. Unpacks req.body / req.params &amp; passes sanitized inputs to Service
+      v
+ [Service Layer] (e.g. allocation.service.js)
+      |
+      | 5. Executes Business Logic, Adaptive Transactions, Pre-conditions
+      v
+ [Model Layer] (e.g. allocation.model.js)
+      |
+      | 6. Interacts with MongoDB Engine (Partial Indexes, Validations, Aggregations)
+      v
+ [MongoDB Database] (hostel_management)
+</div>
+
+<h2>3.2 Request-Response Lifecycle</h2>
+<p>Every incoming HTTP request traverses a strictly controlled multi-stage security and validation pipeline before reaching business logic:</p>
+<ol>
+    <li><strong>Security Headers (Helmet):</strong> Injects HTTP headers to disable unsafe scripts and iframe embedding.</li>
+    <li><strong>CORS Verification:</strong> Confirms the client origin matches trusted development and production domains (<code>localhost:5173</code>, <code>127.0.0.1:5173</code>).</li>
+    <li><strong>Rate Limiting:</strong> Enforces an allocation of 3,000 requests per 15 minutes during development (100 in production).</li>
+    <li><strong>Body &amp; Cookie Parsing:</strong> Parses request bodies up to 10KB (mitigating buffer overflow attacks) and extracts signed cookies.</li>
+    <li><strong>CSRF Mitigation:</strong> For all mutating HTTP verbs (<code>POST</code>, <code>PUT</code>, <code>PATCH</code>, <code>DELETE</code>), verifies that <code>X-Requested-With === "XMLHttpRequest"</code>.</li>
+    <li><strong>Authentication Middleware:</strong> Extracts <code>accessToken</code>, verifies JWT signature, checks the <code>RevokedToken</code> table, and attaches <code>req.user</code>.</li>
+    <li><strong>Role Authorization Middleware:</strong> Verifies that <code>req.user.role</code> belongs to permitted roles (e.g., <code>authorizeRoles("admin", "warden")</code>).</li>
+    <li><strong>Zod Schema Validation:</strong> Validates payload formats, emitting standard <code>400 Bad Request</code> messages on failure.</li>
+    <li><strong>Service Execution:</strong> Executes atomic operations within <code>withOptionalTransaction</code>.</li>
+    <li><strong>Standardized Response / Error Middleware:</strong> Emits formatted JSON via <code>sendSuccess()</code> or captures exceptions in <code>error.middleware.js</code>.</li>
+</ol>
+
+<div class="page-break"></div>
+
+<!-- ========================================== -->
+<!-- CHAPTER 4: FOLDER STRUCTURE               -->
+<!-- ========================================== -->
+<div class="chapter-header">
+    <div class="chapter-number">Chapter 4</div>
+    <h1 class="chapter-title">Complete Project Folder Structure</h1>
+</div>
+
+<h2>4.1 Complete Directory Tree</h2>
+<div class="diagram-box">
+smart-hostel/
+├── PROGRESS_REPORT.md                 # Executive Markdown progress report
+├── Smart_Hostel_DBMS_Progress_Report.pdf # 4-page summary report
+├── README.md                          # Master project documentation
+│
+├── server/                            # BACKEND EXPRESS SERVER
+│   ├── package.json                   # Server dependencies &amp; test scripts
+│   ├── .env.example                   # Backend environment configuration template
+│   ├── src/
+│   │   ├── server.js                  # HTTP listener &amp; graceful shutdown handlers
+│   │   ├── app.js                     # Express app setup, middlewares &amp; route mounting
+│   │   ├── config/
+│   │   │   ├── db.js                  # MongoDB Mongoose connection manager
+│   │   │   └── env.js                 # Environment variable validation &amp; exports
+│   │   ├── models/                    # Mongoose database schemas
+│   │   │   ├── user.model.js          # Resident, staff, warden, and admin schema
+│   │   │   ├── hostel.model.js        # Hostel block schema with gender policies
+│   │   │   ├── room.model.js          # Room inventory with capacity bounds
+│   │   │   ├── bed.model.js           # Bed units with operational status
+│   │   │   ├── allocation.model.js    # Student-bed allocations &amp; partial unique indexes
+│   │   │   ├── complaint.model.js     # Maintenance grievances &amp; ticket lifecycle
+│   │   │   ├── notice.model.js        # Official campus notices and announcements
+│   │   │   ├── visitor.model.js       # Campus entry gate passes &amp; check-out logs
+│   │   │   └── revokedToken.model.js  # Blacklisted JWT tokens with TTL auto-purge
+│   │   ├── controllers/               # Request handling &amp; HTTP response formatting
+│   │   ├── services/                  # Business logic, aggregations &amp; database queries
+│   │   ├── middlewares/               # Auth, RBAC, CSRF, rate-limit &amp; error handlers
+│   │   ├── validators/                # Zod request validation schemas
+│   │   ├── utils/                     # ApiError, token utils, transactions, response helpers
+│   │   ├── seed.js                    # Full project seeder (14 hostels, demo users, records)
+│   │   ├── seedUsers.js               # High-scale user generator (500 residents)
+│   │   └── seedIITGHostels.js         # Dedicated IIT Guwahati 14-hostel population script
+│   └── tests/                         # Native integration test suites (85 tests passing)
+│
+└── client/                            # FRONTEND REACT APPLICATION
+    ├── package.json                   # Client dependencies &amp; Vite scripts
+    ├── vite.config.js                 # Vite build &amp; plugin configuration
+    ├── vitest.config.js               # Vitest integration test configuration
+    ├── index.html                     # SPA single-page entry HTML
+    └── src/
+        ├── main.jsx                   # React 19 root DOM mount
+        ├── App.jsx                    # Application root wrapped in AuthProvider
+        ├── api/                       # Central Axios client with CSRF interceptors
+        ├── config/                    # Role-specific dashboard navigation manifests
+        ├── context/                   # Global AuthContext &amp; cookie session provider
+        ├── hooks/                     # Custom React hooks (useAuth)
+        ├── layouts/                   # DashboardLayout (sidebar/topbar) &amp; PublicLayout
+        ├── pages/                     # HomePage, RoleDashboardPage, NotFoundPage
+        ├── routes/                    # AppRoutes, ProtectedRoute, RoleRoute, GuestRoute
+        ├── styles/                    # global.css design tokens &amp; dashboard.css layout
+        ├── features/                  # Modular domain slices (allocations, complaints, etc.)
+        └── test/                      # Vitest component &amp; route integration tests (21 tests)
+</div>
+
+<div class="page-break"></div>
+
+<!-- ========================================== -->
+<!-- CHAPTER 5: DATABASE DESIGN                -->
+<!-- ========================================== -->
+<div class="chapter-header">
+    <div class="chapter-number">Chapter 5</div>
+    <h1 class="chapter-title">Database Design, Schema Constraints &amp; MongoDB Modeling</h1>
+</div>
+
+<h2>5.1 Entity Relationship &amp; Collection Model</h2>
+<p>
+    The MongoDB database (<code>hostel_management</code>) incorporates <strong>9 specialized collections</strong>. Referential integrity is strictly maintained through MongoDB <code>ObjectId</code> references and verified by application service-layer pre-condition checks.
+</p>
+
+<h2>5.2 Detailed Collection Schemas</h2>
+
+<h3>5.2.1 Users Collection (users)</h3>
+<p>Stores identity, encrypted credentials, access roles, and activity status.</p>
+<table>
+    <thead>
+        <tr><th>Field Name</th><th>BSON Type</th><th>Constraints &amp; Validation</th><th>Description</th></tr>
+    </thead>
+    <tbody>
+        <tr><td><code>_id</code></td><td>ObjectId</td><td>Primary Key (auto-generated)</td><td>Unique user document identifier.</td></tr>
+        <tr><td><code>name</code></td><td>String</td><td>Required, trim, length: 2&ndash;100</td><td>Full name of resident or staff member.</td></tr>
+        <tr><td><code>email</code></td><td>String</td><td>Required, unique, lowercase, regex match</td><td>User's email used as primary login handle.</td></tr>
+        <tr><td><code>password</code></td><td>String</td><td>Required, minlength: 8, <code>select: false</code></td><td>Bcrypt-hashed password (salt rounds: 12).</td></tr>
+        <tr><td><code>phone</code></td><td>String</td><td>Optional, trim, default: <code>null</code></td><td>Contact phone number.</td></tr>
+        <tr><td><code>role</code></td><td>String</td><td>Enum: <code>student</code>, <code>warden</code>, <code>staff</code>, <code>admin</code></td><td>RBAC permission role. Default: <code>student</code>.</td></tr>
+        <tr><td><code>isActive</code></td><td>Boolean</td><td>Default: <code>true</code>, Index: true</td><td>Account status flag allowing instant revocation.</td></tr>
+        <tr><td><code>lastLoginAt</code></td><td>Date</td><td>Default: <code>null</code></td><td>Timestamp of most recent authentication.</td></tr>
+    </tbody>
+</table>
+
+<h3>5.2.2 Hostels Collection (hostels)</h3>
+<p>Models physical residential blocks across the campus.</p>
+<table>
+    <thead>
+        <tr><th>Field Name</th><th>BSON Type</th><th>Constraints &amp; Validation</th><th>Description</th></tr>
+    </thead>
+    <tbody>
+        <tr><td><code>_id</code></td><td>ObjectId</td><td>Primary Key</td><td>Unique hostel identifier.</td></tr>
+        <tr><td><code>name</code></td><td>String</td><td>Required, trim, length: 2&ndash;120</td><td>Full title (e.g. "Brahmaputra Hostel").</td></tr>
+        <tr><td><code>code</code></td><td>String</td><td>Required, unique index, uppercase, regex</td><td>Short unique acronym (e.g. <code>BRH</code>, <code>DIS</code>).</td></tr>
+        <tr><td><code>location</code></td><td>String</td><td>Required, trim, length: 3&ndash;200</td><td>Campus zone (e.g. "North Campus, IIT Guwahati").</td></tr>
+        <tr><td><code>genderPolicy</code></td><td>String</td><td>Enum: <code>male</code>, <code>female</code>, <code>coed</code></td><td>Gender segregation policy.</td></tr>
+        <tr><td><code>warden</code></td><td>ObjectId</td><td>Ref: <code>User</code>, default: <code>null</code></td><td>Foreign key to assigned faculty warden.</td></tr>
+        <tr><td><code>isActive</code></td><td>Boolean</td><td>Default: <code>true</code></td><td>Operational status of the building.</td></tr>
+    </tbody>
+</table>
+
+<h3>5.2.3 Rooms Collection (rooms)</h3>
+<p>Represents physical rooms within a parent hostel block.</p>
+<table>
+    <thead>
+        <tr><th>Field Name</th><th>BSON Type</th><th>Constraints &amp; Validation</th><th>Description</th></tr>
+    </thead>
+    <tbody>
+        <tr><td><code>_id</code></td><td>ObjectId</td><td>Primary Key</td><td>Unique room identifier.</td></tr>
+        <tr><td><code>hostel</code></td><td>ObjectId</td><td>Ref: <code>Hostel</code>, required, immutable</td><td>Parent hostel block reference.</td></tr>
+        <tr><td><code>roomNumber</code></td><td>String</td><td>Required, uppercase, regex</td><td>Room door identifier (e.g. "A-101", "102").</td></tr>
+        <tr><td><code>floor</code></td><td>Number</td><td>Required, integer, min: 0, max: 100</td><td>Floor level (0 = Ground Floor).</td></tr>
+        <tr><td><code>capacity</code></td><td>Number</td><td>Required, integer, min: 1, max: 20</td><td>Maximum student beds allowed in the room.</td></tr>
+        <tr><td><code>bedCount</code></td><td>Number</td><td>Default: 0, integer</td><td>Denormalized counter of provisioned physical beds.</td></tr>
+        <tr><td><code>status</code></td><td>String</td><td>Enum: <code>active</code>, <code>maintenance</code>, <code>inactive</code></td><td>Operational status of the room.</td></tr>
+    </tbody>
+</table>
+
+<h3>5.2.4 Allocations Collection (allocations)</h3>
+<p>Core DBMS entity recording active and historical student bed allocations.</p>
+<table>
+    <thead>
+        <tr><th>Field Name</th><th>BSON Type</th><th>Constraints &amp; Validation</th><th>Description</th></tr>
+    </thead>
+    <tbody>
+        <tr><td><code>_id</code></td><td>ObjectId</td><td>Primary Key</td><td>Unique allocation document identifier.</td></tr>
+        <tr><td><code>student</code></td><td>ObjectId</td><td>Ref: <code>User</code>, required, immutable</td><td>Assigned resident student.</td></tr>
+        <tr><td><code>hostel</code></td><td>ObjectId</td><td>Ref: <code>Hostel</code>, required, immutable</td><td>Assigned hostel block.</td></tr>
+        <tr><td><code>room</code></td><td>ObjectId</td><td>Ref: <code>Room</code>, required, immutable</td><td>Assigned room reference.</td></tr>
+        <tr><td><code>bed</code></td><td>ObjectId</td><td>Ref: <code>Bed</code>, required, immutable</td><td>Assigned physical bed document.</td></tr>
+        <tr><td><code>status</code></td><td>String</td><td>Enum: <code>active</code>, <code>vacated</code>, default: <code>active</code></td><td>Allocation state.</td></tr>
+        <tr><td><code>allocatedAt</code></td><td>Date</td><td>Required, default: <code>Date.now</code></td><td>Check-in / assignment timestamp.</td></tr>
+        <tr><td><code>vacatedAt</code></td><td>Date</td><td>Default: <code>null</code></td><td>Vacation timestamp (required if status=vacated).</td></tr>
+        <tr><td><code>allocatedBy</code></td><td>ObjectId</td><td>Ref: <code>User</code>, required</td><td>Administrator who authorized the allocation.</td></tr>
+        <tr><td><code>vacatedBy</code></td><td>ObjectId</td><td>Ref: <code>User</code>, default: <code>null</code></td><td>Administrator who authorized the checkout.</td></tr>
+    </tbody>
+</table>
+
+<h2>5.3 Database Indexing Strategy</h2>
+<div class="callout success">
+    <div class="callout-title">Database Constraints &amp; Indexes Implemented in Production</div>
+    <ul>
+        <li><code>Hostel.index({ code: 1 }, { unique: true })</code>: Enforces global hostel code uniqueness.</li>
+        <li><code>Room.index({ hostel: 1, roomNumber: 1 }, { unique: true })</code>: Prevents duplicate room numbers inside the same hostel block while permitting identical room numbers across different hostels.</li>
+        <li><code>Bed.index({ room: 1, bedNumber: 1 }, { unique: true })</code>: Ensures distinct bed labels within each room.</li>
+        <li><code>Allocation.index({ student: 1 }, { unique: true, partialFilterExpression: { status: "active" } })</code>: <strong>Zero Double Allocation:</strong> A student can possess at most one active bed allocation at any given time.</li>
+        <li><code>Allocation.index({ bed: 1 }, { unique: true, partialFilterExpression: { status: "active" } })</code>: <strong>Zero Double Occupancy:</strong> A physical bed can be allocated to at most one student at any given time.</li>
+        <li><code>RevokedToken.index({ expiresAt: 1 }, { expireAfterSeconds: 0 })</code>: <strong>MongoDB TTL Index:</strong> Automatically purges expired JWT tokens from the collection without requiring scheduled cron jobs.</li>
+    </ul>
+</div>
+
+<div class="page-break"></div>
+
+<!-- ========================================== -->
+<!-- CHAPTER 6: BACKEND IMPLEMENTATION         -->
+<!-- ========================================== -->
+<div class="chapter-header">
+    <div class="chapter-number">Chapter 6</div>
+    <h1 class="chapter-title">Backend Implementation, Middleware &amp; API Engine</h1>
+</div>
+
+<h2>6.1 Server Initialization (server/src/server.js)</h2>
+<p>
+    The server entry point initializes the database connection before binding Express to the network socket, ensuring that no requests are processed until MongoDB is fully connected:
+</p>
+<div class="code-container">
+    <div class="code-header"><span class="code-filename">server/src/server.js</span><span class="code-lang">javascript</span></div>
+    <pre class="code-pre"><code>const startServer = async () => {
+  try {
+    await connectDB();
+
+    server = app.listen(env.port, () => {
+      console.log(\`Server running on http://localhost:\${env.port}\`);
+    });
+  } catch (error) {
+    console.error("Server startup failed:", error);
+    process.exit(1);
+  }
+};
+
+const shutdownServer = (signal) => {
+  console.log(\`\${signal} received. Shutting down...\`);
+  if (!server) process.exit(0);
+
+  server.close(() => {
+    console.log("HTTP server closed.");
+    process.exit(0);
+  });
+};
+
+process.on("SIGTERM", () => shutdownServer("SIGTERM"));
+process.on("SIGINT", () => shutdownServer("SIGINT"));</code></pre>
+</div>
+
+<h2>6.2 Express App Configuration (server/src/app.js)</h2>
+<p>
+    <code>app.js</code> assembles all security middlewares, body parsers, cookie processors, and route handlers. It incorporates dynamic origin resolution so developers can test seamlessly across both <code>localhost</code> and <code>127.0.0.1</code> without violating CORS with credentials:
+</p>
+<div class="code-container">
+    <div class="code-header"><span class="code-filename">server/src/app.js</span><span class="code-lang">javascript</span></div>
+    <pre class="code-pre"><code>const allowedOrigins = [
+  env.clientUrl,
+  "http://localhost:5173",
+  "http://127.0.0.1:5173",
+  "http://localhost:5174",
+  "http://127.0.0.1:5174",
+];
+
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+      return callback(null, false);
+    },
+    credentials: true,
+    allowedHeaders: ["Content-Type", "X-Requested-With"],
+    methods: ["GET", "POST", "PATCH", "PUT", "DELETE"],
+  })
+);</code></pre>
+</div>
+
+<div class="page-break"></div>
+
+<!-- ========================================== -->
+<!-- CHAPTER 7: AUTHENTICATION                 -->
+<!-- ========================================== -->
+<div class="chapter-header">
+    <div class="chapter-number">Chapter 7</div>
+    <h1 class="chapter-title">Authentication, Session Management &amp; Security</h1>
+</div>
+
+<h2>7.1 Authentication Architecture (Cookie-Driven JWT)</h2>
+<p>
+    Unlike insecure implementations that store JWTs in browser <code>localStorage</code> (leaving them vulnerable to Cross-Site Scripting / XSS attacks), the Smart Hostel Management System implements <strong>HTTP-Only Cookie-based Authentication</strong> with an in-database revocation list.
+</p>
+
+<h2>7.2 Authentication Middleware (server/src/middlewares/auth.middleware.js)</h2>
+<p>
+    The <code>authenticate</code> middleware runs on every protected API route:
+</p>
+<div class="code-container">
+    <div class="code-header"><span class="code-filename">server/src/middlewares/auth.middleware.js</span><span class="code-lang">javascript</span></div>
+    <pre class="code-pre"><code>export const authenticate = asyncHandler(async (req, res, next) => {
+    const token = req.cookies?.accessToken;
+    if (!token) {
+        throw new ApiError(401, "Authentication required. Please login.");
+    }
+
+    const payload = verifyAccessToken(token);
+
+    // Check token revocation list (Blacklist check)
+    const revoked = await isTokenRevoked(payload.jti);
+    if (revoked) {
+        throw new ApiError(401, "Session has been revoked. Please login again.");
+    }
+
+    const user = await User.findById(payload.sub);
+    if (!user || !user.isActive) {
+        throw new ApiError(401, "Account is inactive or no longer exists");
+    }
+
+    req.user = user.toSafeObject();
+    next();
+});</code></pre>
+</div>
+
+<h2>7.3 Role-Based Access Control (RBAC) Middleware</h2>
+<p>
+    The <code>authorizeRoles</code> middleware enforces granular permissions across routes:
+</p>
+<div class="code-container">
+    <div class="code-header"><span class="code-filename">server/src/middlewares/role.middleware.js</span><span class="code-lang">javascript</span></div>
+    <pre class="code-pre"><code>export const authorizeRoles = (...allowedRoles) => {
+    return (req, res, next) => {
+        if (!req.user) {
+            return next(new ApiError(401, "Authentication required"));
+        }
+        if (!allowedRoles.includes(req.user.role)) {
+            return next(new ApiError(403, "You do not have permission to access this resource"));
+        }
+        next();
+    };
+};</code></pre>
+</div>
+
+<div class="page-break"></div>
+
+<!-- ========================================== -->
+<!-- CHAPTER 8: FRONTEND IMPLEMENTATION        -->
+<!-- ========================================== -->
+<div class="chapter-header">
+    <div class="chapter-number">Chapter 8</div>
+    <h1 class="chapter-title">Frontend Architecture &amp; Component Engineering</h1>
+</div>
+
+<h2>8.1 Application Architecture &amp; State Management</h2>
+<p>
+    The client application is built with <strong>React 19</strong> and <strong>React Router v8</strong>. Global authentication state is managed via React Context (<code>AuthProvider</code>), which runs a background session validation query (<code>GET /api/v1/auth/me</code>) when the application mounts.
+</p>
+
+<h2>8.2 Axios Client Configuration (client/src/api/httpClient.js)</h2>
+<p>
+    A centralized Axios instance automatically includes the CSRF header on write methods and transforms network and backend errors into consistent JavaScript objects:
+</p>
+<div class="code-container">
+    <div class="code-header"><span class="code-filename">client/src/api/httpClient.js</span><span class="code-lang">javascript</span></div>
+    <pre class="code-pre"><code>const writeMethods = new Set(["post", "put", "patch", "delete"]);
+
+httpClient.interceptors.request.use((config) => {
+    const method = (config.method || "get").toLowerCase();
+    if (writeMethods.has(method)) {
+        config.headers.set("X-Requested-With", "XMLHttpRequest");
+    }
+    return config;
+});
+
+httpClient.interceptors.response.use(
+    (response) => response,
+    (error) => {
+        const message = error.response?.data?.message || 
+                        (error.code === "ECONNABORTED" ? "Request timed out" : "Cannot connect to server");
+        const apiError = new Error(message);
+        apiError.status = error.response?.status || 500;
+        apiError.details = error.response?.data?.errors || [];
+        return Promise.reject(apiError);
+    }
+);</code></pre>
+</div>
+
+<div class="page-break"></div>
+
+<!-- ========================================== -->
+<!-- CHAPTER 9: FEATURE IMPLEMENTATION         -->
+<!-- ========================================== -->
+<div class="chapter-header">
+    <div class="chapter-number">Chapter 9</div>
+    <h1 class="chapter-title">Feature-by-Feature Implementation Guide</h1>
+</div>
+
+<h2>9.1 Student Allocation &amp; Vacancy Management</h2>
+<p>
+    <strong>Purpose:</strong> Assigns students to physical beds in active rooms within their hostel block, enforces vacancy constraints, and prevents double bookings.
+</p>
+<div class="code-container">
+    <div class="code-header"><span class="code-filename">server/src/services/allocation.service.js</span><span class="code-lang">javascript</span></div>
+    <pre class="code-pre"><code>export const allocateStudent = async ({ studentId, hostelId, roomId, bedId, allocatedBy }) => {
+    return await withOptionalTransaction(async (session) => {
+        await requireAdmin(allocatedBy, session);
+
+        // Precondition validations
+        const student = await User.findById(studentId).session(session);
+        if (!student || !student.isActive || student.role !== "student") {
+            throw new ApiError(409, "Only active student accounts can receive allocations");
+        }
+
+        const bed = await Bed.findById(bedId).session(session);
+        if (!bed || bed.operationalStatus !== "usable") {
+            throw new ApiError(409, "The selected bed is not available for allocation");
+        }
+
+        // Create allocation record
+        const [allocation] = await Allocation.create([
+            { student: studentId, hostel: hostelId, room: roomId, bed: bedId, allocatedBy, status: "active" }
+        ], session ? { session } : {});
+
+        return allocation.toSafeObject();
+    });
+};</code></pre>
+</div>
+
+<h2>9.2 Grievance &amp; Maintenance Tracking</h2>
+<p>
+    <strong>Purpose:</strong> Allows resident students to report maintenance defects and empowers wardens to assign tasks to maintenance technicians.
+</p>
+<div class="diagram-box">
+  [Student Submits Ticket] &rarr; Status: "pending"
+             |
+             v
+  [Warden Assigns Staff]   &rarr; Status: "assigned" + assignedTo: Technician ID + assignedAt: Timestamp
+             |
+             v
+  [Technician Starts Work] &rarr; Status: "in_progress"
+             |
+             v
+  [Technician Resolves]    &rarr; Status: "resolved" + resolutionNotes: Notes + resolvedAt: Timestamp
+</div>
+
+<h2>9.3 Reports &amp; Analytics Aggregation</h2>
+<p>
+    The analytics engine in <code>report.service.js</code> processes raw documents across four collections into structured metrics:
+</p>
+<ul>
+    <li><strong>Occupancy Percentages:</strong> Computes <code>(Occupied Beds / Usable Beds) * 100</code> per hostel and system-wide.</li>
+    <li><strong>Room Type Distribution:</strong> Breaks down capacity and occupancy across single, double, and triple-sharing rooms.</li>
+    <li><strong>Turnaround SLA:</strong> Calculates average hours elapsed between complaint creation and resolution.</li>
+    <li><strong>Inventory Integrity Diagnostic:</strong> Cross-checks <code>Room.bedCount</code> against actual bed documents in the <code>beds</code> collection to detect orphaned records.</li>
+</ul>
+
+<div class="page-break"></div>
+
+<!-- ========================================== -->
+<!-- CHAPTER 10: API DOCUMENTATION             -->
+<!-- ========================================== -->
+<div class="chapter-header">
+    <div class="chapter-number">Chapter 10</div>
+    <h1 class="chapter-title">Complete REST API Documentation Reference</h1>
+</div>
+
+<h2>10.1 Authentication &amp; Profile APIs</h2>
+<table>
+    <thead>
+        <tr><th>Method</th><th>Endpoint</th><th>Auth / Role</th><th>Request Body / Parameters</th><th>Response &amp; Status</th></tr>
+    </thead>
+    <tbody>
+        <tr><td><code>POST</code></td><td><code>/api/v1/auth/register</code></td><td>Public</td><td><code>{ name, email, password, phone? }</code></td><td><code>201 Created</code> &bull; Safe user object</td></tr>
+        <tr><td><code>POST</code></td><td><code>/api/v1/auth/login</code></td><td>Public</td><td><code>{ email, password }</code></td><td><code>200 OK</code> &bull; Sets <code>accessToken</code> cookie</td></tr>
+        <tr><td><code>POST</code></td><td><code>/api/v1/auth/logout</code></td><td>Authenticated</td><td>None</td><td><code>200 OK</code> &bull; Revokes JWT &amp; clears cookie</td></tr>
+        <tr><td><code>GET</code></td><td><code>/api/v1/auth/me</code></td><td>Authenticated</td><td>None</td><td><code>200 OK</code> &bull; Authenticated user profile</td></tr>
+    </tbody>
+</table>
+
+<h2>10.2 Allocation &amp; Bed APIs</h2>
+<table>
+    <thead>
+        <tr><th>Method</th><th>Endpoint</th><th>Auth / Role</th><th>Request Body / Parameters</th><th>Response &amp; Status</th></tr>
+    </thead>
+    <tbody>
+        <tr><td><code>GET</code></td><td><code>/api/v1/allocations/vacancies</code></td><td>Admin, Warden</td><td>Query: <code>hostelId?</code></td><td><code>200 OK</code> &bull; List of vacant usable beds</td></tr>
+        <tr><td><code>GET</code></td><td><code>/api/v1/allocations/my</code></td><td>Student Only</td><td>None</td><td><code>200 OK</code> &bull; Active room &amp; bed allocation</td></tr>
+        <tr><td><code>POST</code></td><td><code>/api/v1/allocations</code></td><td>Admin, Warden</td><td><code>{ studentId, hostelId, roomId, bedId }</code></td><td><code>201 Created</code> &bull; Allocation record</td></tr>
+        <tr><td><code>GET</code></td><td><code>/api/v1/allocations</code></td><td>Admin, Warden</td><td>Query: <code>status, studentId, hostelId</code></td><td><code>200 OK</code> &bull; Allocation history</td></tr>
+        <tr><td><code>PATCH</code></td><td><code>/api/v1/allocations/:id/vacate</code></td><td>Admin, Warden</td><td>Param: <code>id</code></td><td><code>200 OK</code> &bull; Sets status=vacated</td></tr>
+    </tbody>
+</table>
+
+<h2>10.3 Complaint &amp; Maintenance APIs</h2>
+<table>
+    <thead>
+        <tr><th>Method</th><th>Endpoint</th><th>Auth / Role</th><th>Request Body / Parameters</th><th>Response &amp; Status</th></tr>
+    </thead>
+    <tbody>
+        <tr><td><code>POST</code></td><td><code>/api/v1/complaints</code></td><td>Student Only</td><td><code>{ title, description, category, priority }</code></td><td><code>201 Created</code> &bull; New grievance ticket</td></tr>
+        <tr><td><code>GET</code></td><td><code>/api/v1/complaints</code></td><td>All (Role-scoped)</td><td>Query: <code>status, category, priority, page</code></td><td><code>200 OK</code> &bull; Paginated tickets</td></tr>
+        <tr><td><code>GET</code></td><td><code>/api/v1/complaints/stats</code></td><td>Admin, Warden</td><td>Query: <code>hostelId?</code></td><td><code>200 OK</code> &bull; Categorized metric counters</td></tr>
+        <tr><td><code>PATCH</code></td><td><code>/api/v1/complaints/:id/assign</code></td><td>Admin, Warden</td><td><code>{ staffId }</code></td><td><code>200 OK</code> &bull; Assigns staff to ticket</td></tr>
+        <tr><td><code>PATCH</code></td><td><code>/api/v1/complaints/:id/status</code></td><td>Admin, Warden, Staff</td><td><code>{ status, resolutionNotes? }</code></td><td><code>200 OK</code> &bull; Updates status</td></tr>
+    </tbody>
+</table>
+
+<div class="page-break"></div>
+
+<!-- ========================================== -->
+<!-- CHAPTER 11: CODE EXPLAINED                -->
+<!-- ========================================== -->
+<div class="chapter-header">
+    <div class="chapter-number">Chapter 11</div>
+    <h1 class="chapter-title">Critical Code Analysis &amp; Algorithmic Breakdown</h1>
+</div>
+
+<h2>11.1 Partial Unique Index Definition</h2>
+<p>
+    <strong>File:</strong> <code>server/src/models/allocation.model.js</code><br>
+    <strong>Concept:</strong> Partial Indexes in MongoDB.
+</p>
+<div class="code-container">
+    <div class="code-header"><span class="code-filename">server/src/models/allocation.model.js</span><span class="code-lang">javascript</span></div>
+    <pre class="code-pre"><code>allocationSchema.index(
+    { student: 1 },
+    {
+        unique: true,
+        name: "unique_active_allocation_per_student",
+        partialFilterExpression: { status: "active" },
+    }
+);</code></pre>
+</div>
+<p>
+    <strong>Explanation:</strong> Normal unique indexes enforce uniqueness across every document in the collection. The <code>partialFilterExpression: { status: "active" }</code> instructs MongoDB to apply the uniqueness constraint <em>only to documents where status is active</em>. Historical documents (where <code>status: "vacated"</code>) are completely ignored by the index, allowing a student to have multiple historical allocations while mathematically restricting them to at most one active bed.
+</p>
+
+<h2>11.2 Adaptive MongoDB Transaction Wrapper</h2>
+<p>
+    <strong>File:</strong> <code>server/src/utils/transaction.js</code><br>
+    <strong>Concept:</strong> Concurrency &amp; Standalone Resilience.
+</p>
+<div class="code-container">
+    <div class="code-header"><span class="code-filename">server/src/utils/transaction.js</span><span class="code-lang">javascript</span></div>
+    <pre class="code-pre"><code>export const withOptionalTransaction = async (callback) => {
+    if (!supportsTransactions()) {
+        return await callback(null);
+    }
+
+    const session = await mongoose.startSession();
+    try {
+        let result;
+        await session.withTransaction(async () => {
+            result = await callback(session);
+        });
+        return result;
+    } catch (error) {
+        if (error?.message?.includes("replica set member or mongos")) {
+            return await callback(null);
+        }
+        throw error;
+    } finally {
+        await session.endSession();
+    }
+};</code></pre>
+</div>
+<p>
+    <strong>Explanation:</strong> In MongoDB, multi-document ACID transactions strictly require a Replica Set topology. If code attempts to run <code>session.startTransaction()</code> on a local developer's standalone single-node instance, MongoDB throws an error. This adaptive wrapper inspects the client's topology description at runtime. If running in a cluster, it wraps operations in an ACID transaction session; if running standalone, it executes safely with <code>session = null</code>, ensuring cross-environment portability without code modification.
+</p>
+
+<div class="page-break"></div>
+
+<!-- ========================================== -->
+<!-- CHAPTER 12: EXECUTION FLOW                -->
+<!-- ========================================== -->
+<div class="chapter-header">
+    <div class="chapter-number">Chapter 12</div>
+    <h1 class="chapter-title">End-to-End Execution Flows &amp; Sequence Traces</h1>
+</div>
+
+<h2>12.1 Detailed Workflow: Bed Allocation Lifecycle</h2>
+<p>
+    The sequence diagram below traces the end-to-end execution of a student bed allocation:
+</p>
+
+<div class="diagram-box">
+  User (Warden)          React Client             Express Route           Allocation Service          MongoDB Engine
+       |                       |                         |                        |                         |
+       | 1. Selects Bed &amp;      |                         |                        |                         |
+       |    Clicks "Allocate"  |                         |                        |                         |
+       +---------------------> |                         |                        |                         |
+                               | 2. POST /allocations    |                        |                         |
+                               |    + CSRF Header        |                        |                         |
+                               +-----------------------> |                        |                         |
+                                                         | 3. authenticate()      |                         |
+                                                         |    authorizeRoles()    |                         |
+                                                         |    validate(schema)    |                         |
+                                                         +----------------------> |                         |
+                                                                                  | 4. Verify Student Role  |
+                                                                                  |    &amp; Bed "usable" status|
+                                                                                  +-----------------------> |
+                                                                                  |                         | 5. Query Bed
+                                                                                  | &lt;-----------------------+
+                                                                                  |                         |
+                                                                                  | 6. Insert Allocation    |
+                                                                                  +-----------------------> |
+                                                                                  |                         | 7. Check Partial Index
+                                                                                  |                         |    Insert Document
+                                                                                  | &lt;-----------------------+
+                                                                                  | 8. Return Safe Record   |
+                                                         | &lt;----------------------+                         |
+                               | 9. HTTP 201 Created     |                        |                         |
+                               |    { success: true }    |                        |                         |
+                               | &lt;-----------------------+                        |                         |
+       | 10. Table Updates &amp;   |                         |                        |                         |
+       |     Toast Confirms    |                         |                        |                         |
+       | &lt;---------------------+                         |                        |                         |
+</div>
+
+<div class="page-break"></div>
+
+<!-- ========================================== -->
+<!-- CHAPTER 13: INSTALLATION & SETUP          -->
+<!-- ========================================== -->
+<div class="chapter-header">
+    <div class="chapter-number">Chapter 13</div>
+    <h1 class="chapter-title">Installation, Configuration &amp; Deployment Guide</h1>
+</div>
+
+<h2>13.1 Prerequisites</h2>
+<ul>
+    <li><strong>Node.js:</strong> Version <code>v18.0.0</code> or higher (tested on Node.js v26).</li>
+    <li><strong>MongoDB:</strong> Version <code>6.0+</code> or <code>7.0+</code> running locally on port <code>27017</code> or a MongoDB Atlas connection string.</li>
+    <li><strong>npm:</strong> Version <code>9.0+</code> or <code>10.0+</code>.</li>
+</ul>
+
+<h2>13.2 Step-by-Step Installation Commands</h2>
+<div class="code-container">
+    <div class="code-header"><span class="code-filename">Terminal Commands</span><span class="code-lang">bash</span></div>
+    <pre class="code-pre"><code># 1. Clone the repository
+git clone https://github.com/shiv-pencia/SmartHostel-.git
+cd smart-hostel
+
+# 2. Setup Server Environment &amp; Dependencies
+cd server
+npm install
+cp .env.example .env
+
+# Edit server/.env to ensure MONGODB_URI and PORT are correct:
+# PORT=5001
+# MONGODB_URI=mongodb://127.0.0.1:27017/hostel_management
+# JWT_SECRET=super_secret_jwt_key_for_development_purposes_only
+
+# 3. Seed Database (14 Hostels &amp; 500+ Users)
+npm run seed:hostels
+npm run seed:users
+npm run seed
+
+# 4. Run Backend Server Tests
+npm test
+
+# 5. Start Backend Server
+npm run dev
+# (Runs nodemon on http://localhost:5001)
+
+# 6. In a new terminal, Setup Client Environment &amp; Dependencies
+cd ../client
+npm install
+cp .env.example .env
+
+# Ensure client/.env has:
+# VITE_API_BASE_URL=http://localhost:5001/api/v1
+
+# 7. Run Frontend Tests
+npm test
+
+# 8. Start Frontend Development Server
+npm run dev
+# (Runs Vite on http://localhost:5173)</code></pre>
+</div>
+
+<div class="page-break"></div>
+
+<!-- ========================================== -->
+<!-- CHAPTER 14: TESTING & QA                  -->
+<!-- ========================================== -->
+<div class="chapter-header">
+    <div class="chapter-number">Chapter 14</div>
+    <h1 class="chapter-title">Testing Strategy, Quality Assurance &amp; Debugging</h1>
+</div>
+
+<h2>14.1 Automated Test Suite Verification</h2>
+<p>
+    The project maintains an automated test suite comprising <strong>106 automated integration tests</strong> across backend and frontend tiers with a <strong>100% pass rate</strong>.
+</p>
+
+<table>
+    <thead>
+        <tr><th>Tier</th><th>Test Suite File</th><th>Runner / Environment</th><th>Tests</th><th>Status</th></tr>
+    </thead>
+    <tbody>
+        <tr><td>Backend</td><td><code>auth.integration.test.js</code></td><td>Node.js <code>--test</code> + MongoMemoryServer</td><td>11 Tests</td><td>PASS</td></tr>
+        <tr><td>Backend</td><td><code>allocation.api.integration.test.js</code></td><td>Node.js <code>--test</code> + MongoMemoryServer</td><td>11 Tests</td><td>PASS</td></tr>
+        <tr><td>Backend</td><td><code>allocation-model.integration.test.js</code></td><td>Node.js <code>--test</code> + MongoMemoryServer</td><td>2 Tests</td><td>PASS</td></tr>
+        <tr><td>Backend</td><td><code>complaint.integration.test.js</code></td><td>Node.js <code>--test</code> + MongoMemoryServer</td><td>9 Tests</td><td>PASS</td></tr>
+        <tr><td>Backend</td><td><code>hostel-models.integration.test.js</code></td><td>Node.js <code>--test</code> + MongoMemoryServer</td><td>8 Tests</td><td>PASS</td></tr>
+        <tr><td>Backend</td><td><code>room-bed.integration.test.js</code></td><td>Node.js <code>--test</code> + MongoMemoryServer</td><td>7 Tests</td><td>PASS</td></tr>
+        <tr><td>Backend</td><td><code>inventory-report.integration.test.js</code></td><td>Node.js <code>--test</code> + MongoMemoryServer</td><td>7 Tests</td><td>PASS</td></tr>
+        <tr><td>Backend</td><td><code>report.integration.test.js</code></td><td>Node.js <code>--test</code> + MongoMemoryServer</td><td>7 Tests</td><td>PASS</td></tr>
+        <tr><td>Backend</td><td><code>notice-visitor.integration.test.js</code></td><td>Node.js <code>--test</code> + MongoMemoryServer</td><td>6 Tests</td><td>PASS</td></tr>
+        <tr><td>Frontend</td><td><code>auth.integration.test.jsx</code></td><td>Vitest + React Testing Library + JSDOM</td><td>7 Tests</td><td>PASS</td></tr>
+        <tr><td>Frontend</td><td><code>users.integration.test.jsx</code></td><td>Vitest + React Testing Library + JSDOM</td><td>7 Tests</td><td>PASS</td></tr>
+        <tr><td>Frontend</td><td><code>allocations.integration.test.jsx</code></td><td>Vitest + React Testing Library + JSDOM</td><td>3 Tests</td><td>PASS</td></tr>
+        <tr><td>Frontend</td><td><code>reports.integration.test.jsx</code></td><td>Vitest + React Testing Library + JSDOM</td><td>4 Tests</td><td>PASS</td></tr>
+    </tbody>
+</table>
+
+<div class="page-break"></div>
+
+<!-- ========================================== -->
+<!-- CHAPTER 15: SECURITY & LIMITATIONS        -->
+<!-- ========================================== -->
+<div class="chapter-header">
+    <div class="chapter-number">Chapter 15</div>
+    <h1 class="chapter-title">Security Architecture, Edge Cases &amp; Limitations</h1>
+</div>
+
+<h2>15.1 Implemented Security Mechanisms</h2>
+<ul>
+    <li><strong>HttpOnly, SameSite Cookies:</strong> JWT access tokens are stored in HTTP-Only cookies, preventing JavaScript access and neutralizing XSS token theft.</li>
+    <li><strong>Cryptographic Salting &amp; Hashing:</strong> Passwords hashed with Bcrypt using 12 salt rounds. Plaintext passwords are never logged or persisted.</li>
+    <li><strong>Token Blacklisting with TTL:</strong> Logout immediately hashes the JWT <code>jti</code> and records it in <code>revoked_tokens</code>. The database automatically discards expired records.</li>
+    <li><strong>CSRF Mitigation:</strong> Requires <code>X-Requested-With: XMLHttpRequest</code> on all state-mutating HTTP methods.</li>
+    <li><strong>Rate Limiting:</strong> IP-based request throttling prevents brute-force login attempts.</li>
+    <li><strong>Input Sanitization:</strong> Zod schemas strictly parse, validate, and trim all incoming request fields.</li>
+</ul>
+
+<h2>15.2 Limitations &amp; Proposed Improvements</h2>
+<ul>
+    <li><strong>Current Limitation:</strong> Image attachments for maintenance complaints (e.g. photos of broken pipes) are not yet integrated with an S3 object store.</li>
+    <li><strong>Future Scope:</strong> Implementation of WebSocket subscriptions (Socket.io) for instant real-time notification alerts when a complaint status changes.</li>
+    <li><strong>Future Scope:</strong> Integration of automated biometric or RFID gate scanners directly with the Visitor and Attendance service.</li>
+</ul>
+
+<div class="page-break"></div>
+
+<!-- ========================================== -->
+<!-- CHAPTER 16: VIVA PREPARATION (25+ Q&A)    -->
+<!-- ========================================== -->
+<div class="chapter-header">
+    <div class="chapter-number">Chapter 16</div>
+    <h1 class="chapter-title">Viva Voce &amp; Technical Interview Preparation</h1>
+</div>
+
+<h2>Comprehensive Technical Questions &amp; In-Depth Answers</h2>
+
+<div class="viva-item">
+    <div class="viva-tag">DBMS Concept</div>
+    <div class="viva-q">Q1: Why did you choose MongoDB instead of a relational database like PostgreSQL or MySQL?</div>
+    <div class="viva-a">
+        <strong>Concise Answer:</strong> MongoDB provides horizontal scalability, dynamic schema evolution for diverse campus entities, and high-performance native aggregation pipelines.<br>
+        <strong>In-Depth:</strong> Hostels, room types, and complaint categories vary across campus blocks. MongoDB's document model represents nested real-world relationships naturally while Mongoose schemas enforce rigorous data validation and relational integrity via <code>ObjectId</code> references. Furthermore, MongoDB's partial indexes and aggregation pipelines (<code>$lookup</code>, <code>$facet</code>) offer relational capability with NoSQL speed.
+    </div>
+</div>
+
+<div class="viva-item">
+    <div class="viva-tag">Concurrency &amp; Indexing</div>
+    <div class="viva-q">Q2: How does your system mathematically prevent two students from being allocated the same bed?</div>
+    <div class="viva-a">
+        <strong>Concise Answer:</strong> Through MongoDB partial unique compound indexes on the <code>allocations</code> collection.<br>
+        <strong>In-Depth:</strong> We defined a unique compound index: <code>Allocation.index({ bed: 1 }, { unique: true, partialFilterExpression: { status: "active" } })</code>. If two administrators concurrently submit an allocation request for Bed B1, MongoDB accepts the first write and immediately throws an <code>E11000 Duplicate Key Error</code> on the second, translated to an HTTP 409 Conflict.
+    </div>
+</div>
+
+<div class="viva-item">
+    <div class="viva-tag">Security &amp; Auth</div>
+    <div class="viva-q">Q3: Why use HTTP-Only cookies instead of storing JWTs in browser localStorage?</div>
+    <div class="viva-a">
+        <strong>Concise Answer:</strong> Storing JWTs in <code>localStorage</code> makes them vulnerable to theft via Cross-Site Scripting (XSS).<br>
+        <strong>In-Depth:</strong> Any third-party script or injected XSS attack can read <code>localStorage.getItem('token')</code>. With <code>HttpOnly</code> cookies, JavaScript running in the browser cannot read the cookie string. The browser attaches the cookie automatically to requests matching the origin. Combined with CSRF headers, this provides enterprise-level security.
+    </div>
+</div>
+
+<div class="viva-item">
+    <div class="viva-tag">DBMS Integrity</div>
+    <div class="viva-q">Q4: How does your database handle student checkout/vacation? Do you delete the allocation document?</div>
+    <div class="viva-a">
+        <strong>Concise Answer:</strong> No, allocation records are never deleted; they are marked with <code>status: "vacated"</code>.<br>
+        <strong>In-Depth:</strong> Deleting allocations destroys historical occupancy records and audit trails. When vacating, we update <code>status = "vacated"</code>, record <code>vacatedAt = new Date()</code>, and set <code>vacatedBy = req.user.id</code>. Because of our partial unique index, vacating the record frees the student and bed for future allocations while preserving historical reporting.
+    </div>
+</div>
+
+<div class="viva-item">
+    <div class="viva-tag">Transactions</div>
+    <div class="viva-q">Q5: What was the "Transaction numbers are only allowed on a replica set" error and how did you resolve it?</div>
+    <div class="viva-a">
+        <strong>Concise Answer:</strong> MongoDB transactions require a replica set or mongos cluster and crash on standalone instances.<br>
+        <strong>In-Depth:</strong> We designed an adaptive wrapper <code>withOptionalTransaction</code> in <code>transaction.js</code> that inspects the connection topology. If connected to a cluster, it runs atomic multi-document transactions. If connected to a standalone development server, it executes operations safely without crashing, falling back to structured rollbacks.
+    </div>
+</div>
+
+<div class="viva-item">
+    <div class="viva-tag">Aggregations</div>
+    <div class="viva-q">Q6: How do you calculate live hostel occupancy percentage?</div>
+    <div class="viva-a">
+        <strong>Concise Answer:</strong> Using Mongoose aggregations that count active allocations and divide by usable beds.<br>
+        <strong>In-Depth:</strong> In <code>report.service.js</code>, we query hostels, fetch their rooms, aggregate usable physical beds, and count active allocations where <code>status: "active"</code>. The formula <code>(Occupied Beds / Usable Beds) * 100</code> yields the exact occupancy percentage.
+    </div>
+</div>
+
+<div class="viva-item">
+    <div class="viva-tag">Security &amp; Sessions</div>
+    <div class="viva-q">Q7: How does logout work if JWT is a stateless token?</div>
+    <div class="viva-a">
+        <strong>Concise Answer:</strong> Through a token revocation blacklist with MongoDB TTL auto-expiry.<br>
+        <strong>In-Depth:</strong> Each JWT contains a unique <code>jti</code> (UUID). Upon logout, the server hashes the <code>jti</code> using SHA-256 and writes it to <code>revoked_tokens</code> with the token's expiration date. The <code>authenticate</code> middleware checks this collection. Once the token's natural expiration passes, MongoDB's TTL index automatically deletes the document.
+    </div>
+</div>
+
+<div class="viva-item">
+    <div class="viva-tag">RBAC Bug Fix</div>
+    <div class="viva-q">Q8: Why were Wardens initially unable to see complaints and allocations, and how did you fix it?</div>
+    <div class="viva-a">
+        <strong>Concise Answer:</strong> The <code>/api/v1/users</code> route was globally restricted to admin only, causing the warden's client-side <code>Promise.all</code> data fetches to fail with 403 Forbidden.<br>
+        <strong>In-Depth:</strong> In <code>user.routes.js</code>, <code>authorizeRoles("admin")</code> was mounted at the router level. When wardens visited Complaints or Allocations, the frontend called <code>/users</code> to populate technician and student dropdowns, triggering a 403 error that blocked the entire page. We updated <code>user.routes.js</code> to allow wardens read access (<code>GET /users</code>) while keeping mutations (role changes, deactivations) admin-only.
+    </div>
+</div>
+
+<div class="page-break"></div>
+
+<!-- ========================================== -->
+<!-- CHAPTER 17: CONCLUSION                   -->
+<!-- ========================================== -->
+<div class="chapter-header">
+    <div class="chapter-number">Chapter 17</div>
+    <h1 class="chapter-title">Conclusion &amp; Key Learnings</h1>
+</div>
+
+<h2>17.1 Project Summary</h2>
+<p>
+    The Smart Hostel Management System successfully implements a production-ready, full-stack campus accommodation portal. By combining an intuitive React 19 frontend with an Express 5 backend and a structured MongoDB database, the project demonstrates how modern web engineering solves traditional administrative inefficiencies.
+</p>
+<p>
+    The application models all 14 official hostels of IIT Guwahati with authentic capacities and locations, supported by a seeded population of 507 resident accounts. With zero placeholder screens, 106 automated tests passing, clean architectural boundaries, and robust security, the system is fully prepared for university presentation, academic evaluation, and production deployment.
+</p>
+
+<h2>17.2 Technical Learning Outcomes</h2>
+<ul>
+    <li><strong>Advanced Database Indexing:</strong> Hands-on mastery of partial unique indexes, compound unique constraints, and TTL auto-purge indexes.</li>
+    <li><strong>Resilient Concurrency Design:</strong> Engineering adaptive transaction helpers that maintain consistency across diverse MongoDB deployment topologies.</li>
+    <li><strong>Full-Stack Security:</strong> Implementing defense-in-depth security featuring HTTP-Only cookie authentication, CSRF double-submit validation, rate limiting, and RBAC route guards.</li>
+    <li><strong>Modern React Architecture:</strong> Leveraging React 19 concurrent features, Vite 8 build optimization, and Axios interceptor networks for smooth state management.</li>
+</ul>
+
+<div class="footer-note" style="margin-top: 30px;">
+    Smart Hostel Management System &bull; Complete Chapter-Wise Documentation &bull; Generated October 2026 &bull; Ready for Presentation
+</div>
+
+</body>
+</html>
